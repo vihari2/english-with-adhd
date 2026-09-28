@@ -53,6 +53,9 @@
         <div class="card journal" onclick="abrirAnotacao('Writing Journal')">
             ✍️<br>Writing Journal
         </div>
+        <div class="card pomodoro" onclick="abrirAnotacao('Pomodoro')" role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault(); abrirAnotacao('Pomodoro');}">
+            ⏱️<br>Pomodoro
+        </div>
     </div>
 
     <!-- Janela Flutuante de Anotações -->
@@ -103,6 +106,11 @@
     
     <label style="display: block; margin-bottom: 10px;">
         <input type="radio" name="bg-type" value="image" onclick="toggleBgOption('image')"> Upload
+    </label>
+
+    <label style="display: flex; align-items: center; gap: 8px; margin: 14px 0;">
+        <input type="checkbox" id="toggle-tema" onchange="alternarTema()">
+        Dark mode
     </label>
     
     <!-- Input de upload (escondido inicialmente) -->

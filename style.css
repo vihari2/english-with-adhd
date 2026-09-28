@@ -45,9 +45,10 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: minmax(150px, auto);
-    gap: 20px;
+    gap: 12px;
     max-width: 1000px;
     width: 100%;
+    align-content: center;
 }
 
 .card {
@@ -164,7 +165,7 @@ body {
 .other { 
     grid-column: 2 / 3; 
     grid-row: 2 / 3; 
-    font-size: 1em; 
+    font-size: 1em;
 }
 
 /* O card do Gato fica exatamente ao lado, na coluna 3, linha 2 */
@@ -188,6 +189,25 @@ body {
     transform: scale(1.05);
 }
 .journal { grid-column: 3 / 5; grid-row: 3 / 4; }
+.pomodoro { grid-column: 1 / 5; grid-row: 4 / 5; }
+
+.pomodoro-panel { text-align: center; }
+.pomodoro-caption { margin: 0 0 12px; color: #64748b; }
+.pomodoro-activities { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.pomodoro-activity, .pomodoro-controls button {
+    border: 0; border-radius: 10px; padding: 9px 13px; cursor: pointer;
+    font: inherit; font-size: 0.9rem; background: #f1f5f9; color: #334155;
+}
+.pomodoro-activity.selected { background: #2563eb; color: #fff; }
+.pomodoro-rest-options { display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; color: #64748b; }
+.pomodoro-rest-options.visible { display: flex; }
+.pomodoro-rest-choice { border: 1px solid #fed7aa; border-radius: 9px; padding: 7px 12px; background: #fff; color: #9a3412; cursor: pointer; font: inherit; }
+.pomodoro-rest-choice.selected { background: #ffedd5; border-color: #fb923c; font-weight: 700; }
+.pomodoro-clock { margin-top: 18px; color: #1e293b; font-size: 3.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pomodoro-current { margin: 4px 0 14px; color: #64748b; }
+.pomodoro-controls { display: flex; justify-content: center; gap: 10px; }
+.pomodoro-controls button { background: #2563eb; color: #fff; min-width: 90px; }
+.pomodoro-controls button.pomodoro-reset { background: #e2e8f0; color: #334155; }
 
 .foto-perfil {
     width: 80px;
@@ -649,7 +669,7 @@ textarea {
         gap: 12px;
     }
 
-    .flashcards, .profile, .meet, .coursebook, .other, .journal, .foto-gato-card {
+    .flashcards, .profile, .meet, .coursebook, .other, .journal, .foto-gato-card, .pomodoro {
         grid-column: 1 / -1;
         grid-row: auto;
     }
@@ -946,6 +966,70 @@ textarea {
 .textarea-meet:focus {
     border-bottom: 1px solid #1a73e8;
 }
+
+/* Dark theme, controlled from Customize Background. */
+.dark-mode {
+    background-color: #171923 !important;
+    color: #e5e7eb;
+    color-scheme: dark;
+}
+
+.dark-mode .card,
+.dark-mode .auth-panel,
+.dark-mode .auth-box,
+.dark-mode .modal-content,
+.dark-mode #modal-config-bg {
+    background-color: #242735;
+    color: #e5e7eb;
+    border-color: #3b4050;
+}
+
+.dark-mode .card { box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.dark-mode .profile p { color: #c1c5d0 !important; }
+.dark-mode .nome-usuario,
+.dark-mode .modal-content h2,
+.dark-mode .modal-content h3,
+.dark-mode .modal-content h4,
+.dark-mode .modal-content label,
+.dark-mode .modal-content td,
+.dark-mode .modal-content p,
+.dark-mode .modal-content strong,
+.dark-mode .modal-content span { color: #e5e7eb; }
+.dark-mode .modal-content input,
+.dark-mode .modal-content select,
+.dark-mode .modal-content textarea,
+.dark-mode .modal-content .form-flashcard select,
+.dark-mode .modal-content .form-flashcard textarea {
+    background-color: #1b1e29;
+    color: #f3f4f6;
+    border-color: #4b5263;
+}
+.dark-mode .modal-content input::placeholder,
+.dark-mode .modal-content textarea::placeholder { color: #9ca3af; }
+.dark-mode .modal-content th,
+.dark-mode .flashcards-tab,
+.dark-mode .baralho-item,
+.dark-mode .contador,
+.dark-mode .visao-baralho {
+    color: #e5e7eb;
+    border-color: #3b4050;
+}
+.dark-mode .baralho-item,
+.dark-mode .contador,
+.dark-mode .visao-baralho,
+.dark-mode .flashcards-container { background-color: #1b1e29; }
+.dark-mode .modal-content tr,
+.dark-mode .flashcards-header,
+.dark-mode .bloco-observacoes { border-color: #3b4050; }
+.dark-mode .btn-cancelar-flashcard,
+.dark-mode .btn-avaliacao.novamente,
+.dark-mode .pomodoro-controls button.pomodoro-reset { background: #3b4050; color: #f3f4f6; }
+.dark-mode .pomodoro-activity:not(.selected) { background: #3b4050; color: #e5e7eb; }
+.dark-mode .pomodoro-rest-choice { background: #3b4050; border-color: #66513e; color: #ffddb8; }
+.dark-mode .pomodoro-rest-choice.selected { background: #644126; }
+.dark-mode .pomodoro-clock { color: #f3f4f6; }
+.dark-mode .dev-banner { background: rgba(36,39,53,.96); color: #d1d5db; border-color: #3b4050; }
+.dark-mode .dev-banner a { color: #93c5fd; }
 
 .bloco-observacoes {
     margin-top: 15px;
