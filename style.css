@@ -984,6 +984,20 @@ textarea {
     border-color: #3b4050;
 }
 
+#btn-config-bg {
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+    color: #555;
+}
+
+.dark-mode #btn-config-bg {
+    background: #242735;
+    border-color: #3b4050;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    color: #e5e7eb;
+}
+
 .dark-mode .card { box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 .dark-mode .profile p { color: #c1c5d0 !important; }
 .dark-mode .nome-usuario,
@@ -1018,6 +1032,21 @@ textarea {
 .dark-mode .contador,
 .dark-mode .visao-baralho,
 .dark-mode .flashcards-container { background-color: #1b1e29; }
+.dark-mode .form-criar-baralho {
+    background-color: #1b1e29;
+    border-color: #3b4050;
+}
+.dark-mode .form-criar-baralho label { color: #e5e7eb; }
+.dark-mode .criar-baralho-controles input {
+    background-color: #242735;
+    border-color: #4b5263;
+    color: #f3f4f6;
+}
+.dark-mode .criar-baralho-controles input::placeholder { color: #9ca3af; }
+.dark-mode .criar-baralho-controles button {
+    background-color: #3b4050;
+    color: #f3f4f6;
+}
 .dark-mode .modal-content tr,
 .dark-mode .flashcards-header,
 .dark-mode .bloco-observacoes { border-color: #3b4050; }
