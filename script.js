@@ -13,6 +13,63 @@ const SUPABASE_URL = 'https://cxwyrfngaslvehcodxij.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_NnWB7ZwtU-x4GMVwDLbVeA_mP2mIe99';
 
 let supabaseClient = null;
+const appDataCache = new Map();
+let appDataUserId = null;
+
+// Mantém a API síncrona usada pela interface, com cache apenas em memória.
+// A persistência real de todos os dados do app fica na tabela user_app_data.
+const appStorage = {
+    getItem(key) {
+        return appDataCache.has(key) ? appDataCache.get(key) : null;
+    },
+    setItem(key, value) {
+        const stringValue = String(value);
+        appDataCache.set(key, stringValue);
+        salvarDadoDoApp(key, stringValue);
+    },
+    removeItem(key) {
+        appDataCache.delete(key);
+        removerDadoDoApp(key);
+    }
+};
+
+async function inicializarDadosDoApp() {
+    const client = getSupabaseClient();
+    const userId = await getCurrentUserId();
+    if (!client || !userId) return;
+
+    appDataUserId = userId;
+    const { data, error } = await client.from('user_app_data')
+        .select('data_key, data_value').eq('user_id', userId);
+    if (error) {
+        console.error('Não foi possível carregar os dados do app:', error);
+        return;
+    }
+
+    appDataCache.clear();
+    (data || []).forEach(row => appDataCache.set(row.data_key, String(row.data_value ?? '')));
+
+}
+
+async function salvarDadoDoApp(key, value) {
+    const client = getSupabaseClient();
+    const userId = appDataUserId || await getCurrentUserId();
+    if (!client || !userId) return;
+    appDataUserId = userId;
+    const { error } = await client.from('user_app_data').upsert({
+        user_id: userId, data_key: key, data_value: value
+    }, { onConflict: 'user_id,data_key' });
+    if (error) console.error(`Não foi possível salvar ${key}:`, error);
+}
+
+async function removerDadoDoApp(key) {
+    const client = getSupabaseClient();
+    const userId = appDataUserId || await getCurrentUserId();
+    if (!client || !userId) return;
+    const { error } = await client.from('user_app_data').delete()
+        .eq('user_id', userId).eq('data_key', key);
+    if (error) console.error(`Não foi possível remover ${key}:`, error);
+}
 
 function getSupabaseClient() {
     if (!supabaseClient && window.supabase) {
@@ -101,13 +158,13 @@ async function loadProfileFromSupabase() {
 
     if (nomeTxt && data?.nome) {
         nomeTxt.textContent = data.nome;
-        localStorage.setItem('nomeUsuario', data.nome);
+        appStorage.setItem('nomeUsuario', data.nome);
     }
 
     // Carregar foto de perfil
     if (data?.avatar_url && fotoImg) {
         fotoImg.src = data.avatar_url;
-        localStorage.setItem('fotoPerfilCustom', data.avatar_url);
+        appStorage.setItem('fotoPerfilCustom', data.avatar_url);
     }
 
     // Carregar imagem de fundo do Supabase
@@ -146,8 +203,8 @@ window.onload =  async function () {
 }
 
 function aplicarBackgroundSalvo() {
-    const tipoSalvo = localStorage.getItem('bg_type');
-    const valorSalvo = localStorage.getItem('bg_value');
+    const tipoSalvo = appStorage.getItem('bg_type');
+    const valorSalvo = appStorage.getItem('bg_value');
 
     if (tipoSalvo === 'image' && valorSalvo) {
         document.body.style.backgroundImage = `url(${valorSalvo})`;
@@ -332,7 +389,7 @@ async function saveNameToSupabase() {
 
     const nomeTag = document.getElementById('nome-txt');
     const nome = nomeTag ? nomeTag.textContent.trim() || 'Your Name Here' : 'Your Name Here';
-    localStorage.setItem('nomeUsuario', nome);
+    appStorage.setItem('nomeUsuario', nome);
 
     const client = getSupabaseClient();
     const { error } = await client
@@ -398,10 +455,7 @@ async function signUpWithEmail() {
         return;
     }
 
-    if (data?.user) {
-        localStorage.setItem('supabase_user_id', data.user.id);
-        await ensureProfile(data.user);
-    }
+    if (data?.user) await ensureProfile(data.user);
 
     setAuthStatus('Account created. Check your email to confirm your registration, then sign in.');
 }
@@ -428,7 +482,6 @@ async function signInWithEmail() {
     }
 
     if (data?.user) {
-        localStorage.setItem('supabase_user_id', data.user.id);
         await ensureProfile(data.user);
         await loadProfileFromSupabase();
         setAuthStatus(`Connected as ${data.user.email}`);
@@ -450,7 +503,8 @@ async function signOut() {
         await client.auth.signOut();
     }
 
-    localStorage.removeItem('supabase_user_id');
+    appDataCache.clear();
+    appDataUserId = null;
     updateAuthUI();
 
     setTimeout(() => {
@@ -459,14 +513,14 @@ async function signOut() {
     }, 300);
 }
 
-function updateAuthUI() {
+async function updateAuthUI() {
     const logoutBtn = document.getElementById('auth-logout');
     const submitBtn = document.getElementById('auth-submit');
     const signupBtn = document.getElementById('auth-signup');
 
     if (!logoutBtn || !submitBtn || !signupBtn) return;
 
-    const loggedIn = isSupabaseConfigured() && !!localStorage.getItem('supabase_user_id');
+    const loggedIn = isSupabaseConfigured() && !!(await getCurrentUserId());
     logoutBtn.classList.toggle('hidden', !loggedIn);
     signupBtn.classList.toggle('hidden', loggedIn);
     submitBtn.textContent = 'Enter';
@@ -478,12 +532,6 @@ function initAuth() {
     authInitialized = true;
 
     // Redirecionamento desabilitado temporariamente
-    // if (isSupabaseConfigured() && localStorage.getItem('supabase_user_id') && !isRedirecting) {
-    //     isRedirecting = true;
-    //     window.location.href = 'index.html';
-    //     return;
-    // }
-
     const form = document.getElementById('auth-form');
     const signUpBtn = document.getElementById('auth-signup');
     const logoutBtn = document.getElementById('auth-logout');
@@ -556,7 +604,7 @@ function abrirAnotacao(nomeBloco) {
 }
 
 function aplicarTemaSalvo() {
-    const temaEscuro = localStorage.getItem('temaEscuro') === 'true';
+    const temaEscuro = appStorage.getItem('temaEscuro') === 'true';
     document.body.classList.toggle('dark-mode', temaEscuro);
     const controleTema = document.getElementById('toggle-tema');
     if (controleTema) controleTema.checked = temaEscuro;
@@ -564,7 +612,7 @@ function aplicarTemaSalvo() {
 
 function alternarTema() {
     const temaEscuro = !document.body.classList.contains('dark-mode');
-    localStorage.setItem('temaEscuro', String(temaEscuro));
+    appStorage.setItem('temaEscuro', String(temaEscuro));
     aplicarTemaSalvo();
 }
 
@@ -663,12 +711,12 @@ function fecharModal() {
     if (blocoAtual === 'Google Meet') {
         const obsTexto = document.getElementById('obs-meet');
         if (obsTexto) {
-            localStorage.setItem('obs_Google Meet', obsTexto.value);
+            appStorage.setItem('obs_Google Meet', obsTexto.value);
         }
     } else if (blocoAtual !== 'Flashcards' && blocoAtual !== 'Other Resources' && blocoAtual !== 'Google Meet' && blocoAtual !== 'Writing Journal' && blocoAtual !== 'My Coursebook') {
         const campoTexto = document.getElementById('modal-texto');
         if (campoTexto) {
-            localStorage.setItem('notas_' + blocoAtual, campoTexto.value);
+            appStorage.setItem('notas_' + blocoAtual, campoTexto.value);
         }
     }
 
@@ -680,7 +728,7 @@ function salvarNome() {
     const nomeTag = document.getElementById('nome-txt');
     if (!nomeTag) return;
     const nome = nomeTag.textContent.trim() || 'Your Name Here';
-    localStorage.setItem('nomeUsuario', nome);
+    appStorage.setItem('nomeUsuario', nome);
 
     if (isSupabaseConfigured()) {
         saveNameToSupabase();
@@ -689,14 +737,14 @@ function salvarNome() {
 
 // -- Bloco de Texto Genérico --
 function renderizarBlocoDeTexto(container, nomeBloco) {
-    const textoSalvo = localStorage.getItem('notas_' + nomeBloco) || '';
+    const textoSalvo = appStorage.getItem('notas_' + nomeBloco) || '';
     container.innerHTML = `<textarea id="modal-texto" placeholder="Write your notes here...">${textoSalvo}</textarea>`;
 }
 
 // -- Flashcards --
 function obterFlashcards() {
     try {
-        return JSON.parse(localStorage.getItem('meusFlashcards')) || [];
+        return JSON.parse(appStorage.getItem('meusFlashcards')) || [];
     } catch (error) {
         return [];
     }
@@ -797,7 +845,7 @@ function obterBaralhos() {
     const nomesDosCards = obterFlashcards().map(obterBaralhoDoCard);
     let baralhosSalvos = [];
     try {
-        baralhosSalvos = JSON.parse(localStorage.getItem('meusBaralhos')) || [];
+        baralhosSalvos = JSON.parse(appStorage.getItem('meusBaralhos')) || [];
     } catch (error) {
         baralhosSalvos = [];
     }
@@ -838,12 +886,12 @@ async function mostrarBaralhos() {
     const cards = await carregarFlashcardsDoSupabase();
 
     // Atualiza o cache local utilizado pelas outras funções
-    localStorage.setItem(
+    appStorage.setItem(
         'meusBaralhos',
         JSON.stringify(baralhos.map(baralho => baralho.nome))
     );
 
-    localStorage.setItem(
+    appStorage.setItem(
         'meusFlashcards',
         JSON.stringify(cards)
     );
@@ -979,14 +1027,14 @@ async function criarBaralho(evento) {
 
     try {
         baralhosSalvos =
-            JSON.parse(localStorage.getItem('meusBaralhos')) || [];
+            JSON.parse(appStorage.getItem('meusBaralhos')) || [];
     } catch (error) {
         baralhosSalvos = [];
     }
 
     baralhosSalvos.push(nome);
 
-    localStorage.setItem(
+    appStorage.setItem(
         'meusBaralhos',
         JSON.stringify(baralhosSalvos)
     );
@@ -1148,7 +1196,7 @@ async function avaliarCard(status) {
     // Atualiza o cache local
     cards[indice].status = status;
 
-    localStorage.setItem(
+    appStorage.setItem(
         'meusFlashcards',
         JSON.stringify(cards)
     );
@@ -1255,7 +1303,7 @@ async function adicionarFlashcard(evento) {
         status: 'new'
     });
 
-    localStorage.setItem(
+    appStorage.setItem(
         'meusFlashcards',
         JSON.stringify(flashcards)
     );
@@ -1538,7 +1586,7 @@ function renderizarGoogleMeet(container) {
 function carregarMeetSalvos() {
     const corpoTabela = document.getElementById('corpo-tabela-meet');
     if (!corpoTabela) return;
-    let sessoes = JSON.parse(localStorage.getItem('meuMeet')) || [];
+    let sessoes = JSON.parse(appStorage.getItem('meuMeet')) || [];
 
     corpoTabela.innerHTML = '';
     sessoes.forEach((item, index) => {
@@ -1561,29 +1609,29 @@ function carregarMeetSalvos() {
 }
 
 function adicionarLinhaMeet() {
-    let sessoes = JSON.parse(localStorage.getItem('meuMeet')) || [];
+    let sessoes = JSON.parse(appStorage.getItem('meuMeet')) || [];
     sessoes.push({ name: '', date: '', status: 'Not started', topic: '' });
-    localStorage.setItem('meuMeet', JSON.stringify(sessoes));
+    appStorage.setItem('meuMeet', JSON.stringify(sessoes));
     carregarMeetSalvos();
 }
 
 function salvarEdicaoMeet(index, campo, novoValor) {
-    let sessoes = JSON.parse(localStorage.getItem('meuMeet')) || [];
+    let sessoes = JSON.parse(appStorage.getItem('meuMeet')) || [];
     sessoes[index][campo] = novoValor;
-    localStorage.setItem('meuMeet', JSON.stringify(sessoes));
+    appStorage.setItem('meuMeet', JSON.stringify(sessoes));
 }
 
 function removerMeet(index) {
-    let sessoes = JSON.parse(localStorage.getItem('meuMeet')) || [];
+    let sessoes = JSON.parse(appStorage.getItem('meuMeet')) || [];
     sessoes.splice(index, 1);
-    localStorage.setItem('meuMeet', JSON.stringify(sessoes));
+    appStorage.setItem('meuMeet', JSON.stringify(sessoes));
     carregarMeetSalvos();
 }
 
 function carregarNotasMeetSalvas() {
     const corpoTabelaNotas = document.getElementById('corpo-tabela-notas-meet');
     if (!corpoTabelaNotas) return;
-    let notas = JSON.parse(localStorage.getItem('diarioNotasMeet')) || [];
+    let notas = JSON.parse(appStorage.getItem('diarioNotasMeet')) || [];
 
     corpoTabelaNotas.innerHTML = '';
     notas.forEach((item, index) => {
@@ -1600,23 +1648,23 @@ function carregarNotasMeetSalvas() {
 }
 
 function adicionarNotaMeet() {
-    let notas = JSON.parse(localStorage.getItem('diarioNotasMeet')) || [];
+    let notas = JSON.parse(appStorage.getItem('diarioNotasMeet')) || [];
     let dataHoje = new Date().toISOString().split('T')[0];
     notas.push({ data: dataHoje, texto: '' });
-    localStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
+    appStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
     carregarNotasMeetSalvas();
 }
 
 function salvarEdicaoNotaMeet(index, campo, novoValor) {
-    let notas = JSON.parse(localStorage.getItem('diarioNotasMeet')) || [];
+    let notas = JSON.parse(appStorage.getItem('diarioNotasMeet')) || [];
     notas[index][campo] = novoValor;
-    localStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
+    appStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
 }
 
 function removerNotaMeet(index) {
-    let notas = JSON.parse(localStorage.getItem('diarioNotasMeet')) || [];
+    let notas = JSON.parse(appStorage.getItem('diarioNotasMeet')) || [];
     notas.splice(index, 1);
-    localStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
+    appStorage.setItem('diarioNotasMeet', JSON.stringify(notas));
     carregarNotasMeetSalvas();
 }
 
@@ -1649,7 +1697,7 @@ function renderizarWritingJournal(container) {
 function carregarJournalSalvo() {
     const corpoTabela = document.getElementById('corpo-tabela-journal');
     if (!corpoTabela) return;
-    let registros = JSON.parse(localStorage.getItem('meuWritingJournal')) || [];
+    let registros = JSON.parse(appStorage.getItem('meuWritingJournal')) || [];
 
     corpoTabela.innerHTML = '';
     registros.forEach((item, index) => {
@@ -1669,23 +1717,23 @@ function carregarJournalSalvo() {
 }
 
 function adicionarRegistroJournal() {
-    let registros = JSON.parse(localStorage.getItem('meuWritingJournal')) || [];
+    let registros = JSON.parse(appStorage.getItem('meuWritingJournal')) || [];
     let dataHoje = new Date().toISOString().split('T')[0];
     registros.push({ data: dataHoje, feito: 'Sim' });
-    localStorage.setItem('meuWritingJournal', JSON.stringify(registros));
+    appStorage.setItem('meuWritingJournal', JSON.stringify(registros));
     carregarJournalSalvo();
 }
 
 function salvarEdicaoJournal(index, campo, novoValor) {
-    let registros = JSON.parse(localStorage.getItem('meuWritingJournal')) || [];
+    let registros = JSON.parse(appStorage.getItem('meuWritingJournal')) || [];
     registros[index][campo] = novoValor;
-    localStorage.setItem('meuWritingJournal', JSON.stringify(registros));
+    appStorage.setItem('meuWritingJournal', JSON.stringify(registros));
 }
 
 function removerJournal(index) {
-    let registros = JSON.parse(localStorage.getItem('meuWritingJournal')) || [];
+    let registros = JSON.parse(appStorage.getItem('meuWritingJournal')) || [];
     registros.splice(index, 1);
-    localStorage.setItem('meuWritingJournal', JSON.stringify(registros));
+    appStorage.setItem('meuWritingJournal', JSON.stringify(registros));
     carregarJournalSalvo();
 }
 
@@ -1714,7 +1762,7 @@ function renderizarCoursebook(container) {
 function carregarCoursebookSalvo() {
     const corpoTabela = document.getElementById('corpo-tabela-coursebook');
     if (!corpoTabela) return;
-    let livros = JSON.parse(localStorage.getItem('meuCoursebook')) || [];
+    let livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
 
     corpoTabela.innerHTML = '';
     livros.forEach((item, index) => {
@@ -1730,23 +1778,23 @@ function carregarCoursebookSalvo() {
 }
 
 function adicionarLivroCoursebook() {
-    let livros = JSON.parse(localStorage.getItem('meuCoursebook')) || [];
+    let livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
     let dataHoje = new Date().toISOString().split('T')[0];
     livros.push({ nome: '', parada: '', data: dataHoje });
-    localStorage.setItem('meuCoursebook', JSON.stringify(livros));
+    appStorage.setItem('meuCoursebook', JSON.stringify(livros));
     carregarCoursebookSalvo();
 }
 
 function salvarEdicaoCoursebook(index, campo, novoValor) {
-    let livros = JSON.parse(localStorage.getItem('meuCoursebook')) || [];
+    let livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
     livros[index][campo] = novoValor;
-    localStorage.setItem('meuCoursebook', JSON.stringify(livros));
+    appStorage.setItem('meuCoursebook', JSON.stringify(livros));
 }
 
 function removerCoursebook(index) {
-    let livros = JSON.parse(localStorage.getItem('meuCoursebook')) || [];
+    let livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
     livros.splice(index, 1);
-    localStorage.setItem('meuCoursebook', JSON.stringify(livros));
+    appStorage.setItem('meuCoursebook', JSON.stringify(livros));
     carregarCoursebookSalvo();
 }
 
@@ -1755,28 +1803,28 @@ const fotoImg = document.getElementById('foto-img');
 const uploadFoto = document.getElementById('upload-foto');
 
 function loadProfileData() {
-    const nomeSalvo = localStorage.getItem('nomeUsuario');
+    const nomeSalvo = appStorage.getItem('nomeUsuario');
     const nomeTxt = document.getElementById('nome-txt');
     if (nomeTxt) {
         nomeTxt.textContent = nomeSalvo || 'Your Name Here';
     }
 
-    const fotoSalva = localStorage.getItem('fotoPerfilCustom');
+    const fotoSalva = appStorage.getItem('fotoPerfilCustom');
     if (fotoSalva && fotoImg) {
         fotoImg.src = fotoSalva;
     }
 
-    const gatoSalvo = localStorage.getItem('fotoGatoCustom');
+    const gatoSalvo = appStorage.getItem('fotoGatoCustom');
     if (gatoSalvo && imgGato) {
         imgGato.src = gatoSalvo;
     }
 }
 
-function redirectIfNeeded() {
+async function redirectIfNeeded() {
     if (isRedirecting) return;
 
     const isLoginPage = window.location.pathname.endsWith('index.html');
-    const isLoggedIn = !!localStorage.getItem('supabase_user_id');
+    const isLoggedIn = !!(await getCurrentUserId());
 
     if (!isLoginPage && !isLoggedIn) {
         isRedirecting = true;
@@ -1792,11 +1840,12 @@ function redirectIfNeeded() {
 
 window.addEventListener('DOMContentLoaded', () => {
     initAuth();
-    aplicarTemaSalvo();
 });
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     // redirectIfNeeded(); // DESABILITADO TEMPORARIAMENTE
+    await inicializarDadosDoApp();
+    aplicarTemaSalvo();
     loadProfileData();
 });
 
@@ -1811,7 +1860,7 @@ if (fotoImg && uploadFoto) {
         reader.onload = function (event) {
             const dataUrl = event.target.result;
             fotoImg.src = dataUrl;
-            localStorage.setItem('fotoPerfilCustom', dataUrl);
+            appStorage.setItem('fotoPerfilCustom', dataUrl);
         };
         reader.readAsDataURL(file);
 
@@ -1835,7 +1884,7 @@ if (imgGato && uploadGato) {
             reader.onload = function (event) {
                 const dataUrl = event.target.result;
                 imgGato.src = dataUrl;
-                localStorage.setItem('fotoGatoCustom', dataUrl);
+                appStorage.setItem('fotoGatoCustom', dataUrl);
             };
             reader.readAsDataURL(file);
         }
@@ -1902,13 +1951,13 @@ async function excluirBaralho(baralho) {
         item => item.nome !== baralho
     );
 
-    localStorage.setItem('meusBaralhos', JSON.stringify(baralhos));
+    appStorage.setItem('meusBaralhos', JSON.stringify(baralhos));
 
     const flashcards = obterFlashcards().filter(
         card => card.baralho_id !== baralhoEncontrado.id
     );
 
-    localStorage.setItem('meusFlashcards', JSON.stringify(flashcards));
+    appStorage.setItem('meusFlashcards', JSON.stringify(flashcards));
 
     alert('Baralho excluído com sucesso!');
 
