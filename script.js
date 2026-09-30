@@ -25,9 +25,20 @@ function isSupabaseConfigured() {
     return !!(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'SUA_URL_DO_SUPABASE' && SUPABASE_ANON_KEY !== 'SUA_CHAVE_ANON');
 }
 
-function getCurrentUserId() {
-    if (!isSupabaseConfigured()) return null;
-    return localStorage.getItem('supabase_user_id');
+async function getCurrentUserId() {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+        return null;
+    }
+
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+        return null;
+    }
+
+    return data.user.id;
 }
 
 function setAuthStatus(message, isError = false) {
@@ -68,10 +79,12 @@ async function ensureProfile(user) {
 }
 
 async function loadProfileFromSupabase() {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
+
     if (!userId || !isSupabaseConfigured()) return;
 
     const client = getSupabaseClient();
+
     const { data, error } = await client
         .from('profiles')
         .select('*')
@@ -83,21 +96,52 @@ async function loadProfileFromSupabase() {
         return;
     }
 
+    // Carregar nome do usuário
     const nomeTxt = document.getElementById('nome-txt');
+
     if (nomeTxt && data?.nome) {
         nomeTxt.textContent = data.nome;
         localStorage.setItem('nomeUsuario', data.nome);
     }
 
+    // Carregar foto de perfil
     if (data?.avatar_url && fotoImg) {
         fotoImg.src = data.avatar_url;
         localStorage.setItem('fotoPerfilCustom', data.avatar_url);
     }
+
+    // Carregar imagem de fundo do Supabase
+    if (data?.bg_type === 'image' && data?.bg_url) {
+
+        const { data: signedData, error: signedError } =
+            await client.storage
+                .from('backgrounds')
+                .createSignedUrl(data.bg_url, 3600);
+
+        if (signedError) {
+            console.error(
+                'Erro ao carregar imagem de fundo:',
+                signedError
+            );
+            return;
+        }
+
+        const imageUrl = signedData.signedUrl;
+
+        document.body.style.backgroundImage = `url("${imageUrl}")`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+
+    } else {
+        document.body.style.backgroundColor = '#F0F2F5';
+        document.body.style.backgroundImage = 'none';
+    }
 }
 
 // --- Inicialização (carregar background salvo) ---
-window.onload = function () {
-    aplicarBackgroundSalvo();
+window.onload =  async function () {
+   await loadProfileFromSupabase();
     // ... suas outras funções de init, se tiver ...
 }
 
@@ -133,45 +177,152 @@ function closeConfigModal() {
     document.getElementById('modal-config-bg').style.display = 'none';
 }
 
-function toggleBgOption(option) {
+async function toggleBgOption(option) {
     const uploadContainer = document.getElementById('upload-container');
+
     if (option === 'image') {
         uploadContainer.style.display = 'block';
-    } else {
-        uploadContainer.style.display = 'none';
-        // Remove a imagem e salva que é cor
-        localStorage.removeItem('bg_value');
-        localStorage.setItem('bg_type', 'color');
-        aplicarBackgroundSalvo();
+        return;
     }
+
+    uploadContainer.style.display = 'none';
+
+    const userId = await getCurrentUserId();
+
+    if (!userId || !isSupabaseConfigured()) {
+        alert("Você precisa estar logada para salvar essa alteração.");
+        return;
+    }
+
+    const client = getSupabaseClient();
+
+    // Buscar o caminho da imagem anterior
+    const { data: profile, error: fetchError } = await client
+        .from('profiles')
+        .select('bg_url')
+        .eq('user_id', userId)
+        .single();
+
+    if (fetchError) {
+        console.error(fetchError);
+        alert("Não foi possível carregar seu perfil.");
+        return;
+    }
+
+    // Remover imagem anterior do Storage, se existir
+    if (profile?.bg_url) {
+        const { error: deleteError } = await client.storage
+            .from('backgrounds')
+            .remove([profile.bg_url]);
+
+        if (deleteError) {
+            console.error(deleteError);
+        }
+    }
+
+    // Salvar a preferência pelo fundo padrão
+    const { error: updateError } = await client
+        .from('profiles')
+        .update({
+            bg_type: 'color',
+            bg_url: null
+        })
+        .eq('user_id', userId);
+
+    if (updateError) {
+        console.error(updateError);
+        alert("Não foi possível salvar o fundo padrão.");
+        return;
+    }
+
+    // Aplicar o fundo padrão
+    document.body.style.backgroundColor = '#F0F2F5';
+    document.body.style.backgroundImage = 'none';
+
+    alert("Fundo padrão salvo com sucesso!");
 }
 
 // --- Mágica do Upload (Base64) ---
-function handleImageUpload(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
+async function handleImageUpload(input) {
+    if (!input.files || !input.files[0]) return;
 
-        // Verificação simples de tamanho (ex: 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert("A imagem é muito grande. Máximo 5MB.");
-            input.value = ""; // Limpa o input
+    const file = input.files[0];
+
+    // Verificar tamanho máximo de 5 MB
+    if (file.size > 5 * 1024 * 1024) {
+        alert("A imagem é muito grande. Máximo 5MB.");
+        input.value = "";
+        return;
+    }
+
+    const userId = await getCurrentUserId();
+
+    if (!userId || !isSupabaseConfigured()) {
+        alert("Você precisa estar logada para salvar a imagem.");
+        return;
+    }
+
+    const client = getSupabaseClient();
+
+    try {
+        // Criar um nome único para o arquivo
+        const extension = file.name.split('.').pop();
+        const filePath = `${userId}/background-${Date.now()}.${extension}`;
+
+        // Enviar imagem para o Supabase Storage
+        const { error: uploadError } = await client.storage
+            .from('backgrounds')
+            .upload(filePath, file, {
+                contentType: file.type,
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error(uploadError);
+            alert("Erro ao enviar a imagem.");
             return;
         }
 
-        const reader = new FileReader();
+        // Salvar o caminho da imagem no perfil do usuário
+        const { error: profileError } = await client
+            .from('profiles')
+            .update({
+                bg_type: 'image',
+                bg_url: filePath
+            })
+            .eq('user_id', userId);
 
-        reader.onload = function (e) {
-            const base64Image = e.target.result;
-
-            // Salva no localStorage
-            localStorage.setItem('bg_type', 'image');
-            localStorage.setItem('bg_value', base64Image);
-
-            // Aplica imediatamente
-            aplicarBackgroundSalvo();
+        if (profileError) {
+            console.error(profileError);
+            alert("A imagem foi enviada, mas não foi possível salvar no perfil.");
+            return;
         }
 
-        reader.readAsDataURL(file); // Converte a imagem para Base64
+        // Gerar URL temporária para exibir a imagem
+        const { data: signedData, error: signedError } =
+            await client.storage
+                .from('backgrounds')
+                .createSignedUrl(filePath, 3600);
+
+        if (signedError) {
+            console.error(signedError);
+            alert("Imagem salva, mas não foi possível exibi-la.");
+            return;
+        }
+
+        // Aplicar imagem de fundo
+        document.body.style.backgroundImage =
+            `url("${signedData.signedUrl}")`;
+
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+
+        alert("Imagem de fundo salva com sucesso!");
+
+    } catch (error) {
+        console.error(error);
+        alert("Ocorreu um erro ao salvar a imagem.");
     }
 }
 
@@ -551,6 +702,77 @@ function obterFlashcards() {
     }
 }
 
+async function carregarFlashcardsDoSupabase() {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+        console.error('Supabase não configurado.');
+        return [];
+    }
+
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+        console.error('Nenhum usuário autenticado.');
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from('flashcards')
+        .select(`
+            id,
+            user_id,
+            baralho_id,
+            frente,
+            verso,
+            status,
+            baralhos (
+                nome
+            )
+        `)
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error('Erro ao carregar flashcards:', error);
+        return [];
+    }
+
+    return data.map(card => ({
+        id: card.id,
+        user_id: card.user_id,
+        baralho_id: card.baralho_id,
+        deck: card.baralhos?.nome || 'Default',
+        front: card.frente,
+        back: card.verso,
+        category: card.baralhos?.nome || 'Default',
+        word: card.frente,
+        meaning: card.verso,
+        status: card.status
+    }));
+}
+
+async function carregarBaralhosDoSupabase() {
+    const supabase = getSupabaseClient();
+    const userId = await getCurrentUserId();
+
+    if (!supabase || !userId) {
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from('baralhos')
+        .select('id, nome')
+        .eq('user_id', userId)
+        .order('nome');
+
+    if (error) {
+        console.error('Erro ao carregar baralhos:', error);
+        return [];
+    }
+
+    return data;
+}
+
 function escaparHtml(valor) {
     const elemento = document.createElement('div');
     elemento.textContent = valor || '';
@@ -604,35 +826,97 @@ function atualizarAbaFlashcards(abaAtiva) {
     });
 }
 
-function mostrarBaralhos() {
+async function mostrarBaralhos() {
     const area = document.getElementById('flashcards-area');
+
     if (!area) return;
+
     atualizarAbaFlashcards('baralhos');
 
-    const cards = obterFlashcards();
-    const baralhos = obterBaralhos();
+    // Busca os dados do Supabase
+    const baralhos = await carregarBaralhosDoSupabase();
+    const cards = await carregarFlashcardsDoSupabase();
+
+    // Atualiza o cache local utilizado pelas outras funções
+    localStorage.setItem(
+        'meusBaralhos',
+        JSON.stringify(baralhos.map(baralho => baralho.nome))
+    );
+
+    localStorage.setItem(
+        'meusFlashcards',
+        JSON.stringify(cards)
+    );
+
+    // Renderiza a tela
     area.innerHTML = `
         <div class="baralhos-acoes">
-            <button class="btn-criar-baralho" type="button" onclick="exibirCriacaoBaralho()">+ Create deck</button>
+            <button
+                class="btn-criar-baralho"
+                id="btn-criar-baralho"
+                type="button">
+                Criar baralho
+            </button>
         </div>
-        <form id="form-criar-baralho" class="form-criar-baralho oculto">
-            <label for="nome-novo-baralho">Deck name</label>
-            <div class="criar-baralho-controles">
-                <input id="nome-novo-baralho" type="text" maxlength="60" placeholder="E.g.: Irregular verbs" required>
-                <button type="submit">Create</button>
-            </div>
-            <p id="aviso-novo-baralho" class="flashcard-aviso" role="status" aria-live="polite"></p>
+
+        <form id="form-criar-baralho">
+            <label for="nome-novo-baralho">
+                Nome do baralho
+            </label>
+
+            <input
+                type="text"
+                id="nome-novo-baralho"
+                placeholder="Ex.: Inglês"
+                required
+            >
+
+            <button type="submit">
+                Create
+            </button>
+
+            <p id="aviso-novo-baralho"></p>
         </form>
-        <section class="lista-baralhos" aria-label="Your decks">
-            ${baralhos.map((baralho) => {
-        const quantidade = cards.filter((card) => obterBaralhoDoCard(card) === baralho).length;
-        return `<button class="baralho-item" type="button" data-baralho="${escaparHtml(baralho)}"><span class="baralho-nome">${escaparHtml(baralho)}</span><span class="baralho-contagem">${quantidade} ${quantidade === 1 ? 'card' : 'cards'}</span></button>`;
-    }).join('')}
+
+        <section class="lista-baralhos">
+            ${baralhos.length === 0
+            ? '<p>Você ainda não possui baralhos. Crie um para começar!</p>'
+            : baralhos.map(baralho => {
+                const quantidade = cards.filter(
+                    card => obterBaralhoDoCard(card) === baralho.nome
+                ).length;
+
+                return `
+                            <button
+                                class="baralho-item"
+                                data-baralho="${escaparHtml(baralho.nome)}"
+                                type="button">
+
+                                <span>
+                                    ${escaparHtml(baralho.nome)}
+                                </span>
+
+                                <span>
+                                    ${quantidade} flashcards
+                                </span>
+
+                            </button>
+                        `;
+            }).join('')
+        }
         </section>
     `;
-    document.getElementById('form-criar-baralho').addEventListener('submit', criarBaralho);
-    document.querySelectorAll('.baralho-item').forEach((botao) => {
-        botao.addEventListener('click', () => abrirBaralho(botao.dataset.baralho));
+
+    // Evento do formulário para criar baralhos
+    document
+        .getElementById('form-criar-baralho')
+        .addEventListener('submit', criarBaralho);
+
+    // Eventos para abrir cada baralho
+    document.querySelectorAll('.baralho-item').forEach(botao => {
+        botao.addEventListener('click', () => {
+            abrirBaralho(botao.dataset.baralho);
+        });
     });
 }
 
@@ -642,40 +926,95 @@ function exibirCriacaoBaralho() {
     document.getElementById('nome-novo-baralho').focus();
 }
 
-function criarBaralho(evento) {
+async function criarBaralho(evento) {
     evento.preventDefault();
+
     const campoNome = document.getElementById('nome-novo-baralho');
     const nome = campoNome.value.trim();
     const aviso = document.getElementById('aviso-novo-baralho');
-    const baralhos = obterBaralhos();
 
-    if (baralhos.some((baralho) => baralho.toLocaleLowerCase() === nome.toLocaleLowerCase())) {
+    if (!nome) return;
+
+    const supabase = getSupabaseClient();
+    const userId = await getCurrentUserId();
+
+    if (!supabase || !userId) {
+        aviso.textContent = 'Please log in again';
+        return;
+    }
+
+    const { data: existente, error: erroBusca } = await supabase
+        .from('baralhos')
+        .select('id')
+        .eq('user_id', userId)
+        .ilike('nome', nome);
+
+    if (erroBusca) {
+        console.error(erroBusca);
+        aviso.textContent = 'Error checking deck';
+        return;
+    }
+
+    if (existente.length > 0) {
         aviso.textContent = 'This deck already exists';
         return;
     }
 
+    const { data, error } = await supabase
+        .from('baralhos')
+        .insert({
+            user_id: userId,
+            nome: nome
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error(error);
+        aviso.textContent = 'Error creating deck';
+        return;
+    }
+
     let baralhosSalvos = [];
+
     try {
-        baralhosSalvos = JSON.parse(localStorage.getItem('meusBaralhos')) || [];
+        baralhosSalvos =
+            JSON.parse(localStorage.getItem('meusBaralhos')) || [];
     } catch (error) {
         baralhosSalvos = [];
     }
+
     baralhosSalvos.push(nome);
-    localStorage.setItem('meusBaralhos', JSON.stringify(baralhosSalvos));
+
+    localStorage.setItem(
+        'meusBaralhos',
+        JSON.stringify(baralhosSalvos)
+    );
+
+    campoNome.value = '';
+    aviso.textContent = 'Deck created';
+
     mostrarBaralhos();
 }
 
 function obterEstadoDoCard(card) {
-    return ['new', 'learning', 'review'].includes(card.status) ? card.status : 'new';
+    return ['new', 'learning', 'review'].includes(card.status)
+        ? card.status
+        : 'new';
 }
 
 function obterContagensDoBaralho(baralho) {
     return obterFlashcards()
-        .filter((card) => obterBaralhoDoCard(card) === baralho)
+        .filter(card => obterBaralhoDoCard(card) === baralho)
         .reduce((contagens, card) => {
             contagens[obterEstadoDoCard(card)] += 1;
+
             return contagens;
-        }, { new: 0, learning: 0, review: 0 });
+        }, {
+            new: 0,
+            learning: 0,
+            review: 0
+        });
 }
 
 function abrirBaralho(baralho) {
@@ -694,11 +1033,19 @@ function abrirBaralho(baralho) {
                 <div class="contador aprendizagem"><strong>${contagens.learning}</strong><span>Learning</span></div>
                 <div class="contador revisar"><strong>${contagens.review}</strong><span>To Review</span></div>
             </div>
-            <button id="btn-estudar-agora" class="btn-estudar-agora" type="button" ${total === 0 ? 'disabled' : ''}>Study now</button>
-            ${total === 0 ? '<p class="estudo-vazio">Add cards to this deck to start studying.</p>' : ''}
+            <button id="btn-estudar-agora" class="btn-estudar-agora" type="button" ${total === 0 ? 'disabled' : ''}>
+                Study now
+            </button>
+
+            <button id="btn-excluir-baralho" class="btn-excluir-baralho" type="button">
+                Excluir baralho
+            </button>
+
+${total === 0 ? '<p class="estudo-vazio">Add cards to this deck to start studying.</p>' : ''}
         </section>
     `;
     document.getElementById('btn-estudar-agora').addEventListener('click', () => iniciarEstudo(baralho));
+    document.getElementById('btn-excluir-baralho').addEventListener('click', () => excluirBaralho(baralho));
 }
 
 function iniciarEstudo(baralho) {
@@ -762,12 +1109,51 @@ function pularCard() {
     renderizarEstudoAtivo();
 }
 
-function avaliarCard(status) {
+async function avaliarCard(status) {
+
     if (!sessaoFlashcards) return;
+
     const indice = sessaoFlashcards.indices[sessaoFlashcards.posicao];
+
     const cards = obterFlashcards();
+
+    const card = cards[indice];
+
+    if (!card || !card.id) {
+        console.error('Flashcard não encontrado ou sem ID.');
+        return;
+    }
+
+    const supabase = getSupabaseClient();
+    const userId = await getCurrentUserId();
+
+    if (!supabase || !userId) {
+        console.error('Usuário não autenticado.');
+        return;
+    }
+
+    // Atualiza o status no Supabase
+    const { error } = await supabase
+        .from('flashcards')
+        .update({ status: status })
+        .eq('id', card.id)
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error('Erro ao atualizar flashcard:', error);
+        alert('Não foi possível salvar a avaliação. Tente novamente.');
+        return;
+    }
+
+    // Atualiza o cache local
     cards[indice].status = status;
-    localStorage.setItem('meusFlashcards', JSON.stringify(cards));
+
+    localStorage.setItem(
+        'meusFlashcards',
+        JSON.stringify(cards)
+    );
+
+    // Avança para o próximo card
     pularCard();
 }
 
@@ -802,8 +1188,9 @@ function mostrarFormularioFlashcard() {
     document.getElementById('flashcard-frente').focus();
 }
 
-function adicionarFlashcard(evento) {
+async function adicionarFlashcard(evento) {
     evento.preventDefault();
+
     const baralho = document.getElementById('flashcard-baralho').value.trim();
     const frente = document.getElementById('flashcard-frente').value.trim();
     const verso = document.getElementById('flashcard-verso').value.trim();
@@ -811,14 +1198,73 @@ function adicionarFlashcard(evento) {
 
     if (!baralho || !frente || !verso) return;
 
+    const supabase = getSupabaseClient();
+    const userId = await getCurrentUserId();
+
+    if (!supabase || !userId) {
+        aviso.textContent = 'Please log in again';
+        return;
+    }
+
+    // Buscar o ID do baralho selecionado
+    const { data: dadosBaralho, error: erroBaralho } = await supabase
+        .from('baralhos')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('nome', baralho)
+        .single();
+
+    if (erroBaralho || !dadosBaralho) {
+        console.error(erroBaralho);
+        aviso.textContent = 'Deck not found';
+        return;
+    }
+
+    // Salvar o flashcard no Supabase
+    const { data, error } = await supabase
+        .from('flashcards')
+        .insert({
+            user_id: userId,
+            baralho_id: dadosBaralho.id,
+            frente: frente,
+            verso: verso,
+            status: 'new'
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error(error);
+        aviso.textContent = 'Error adding card';
+        return;
+    }
+
+    // Cache temporário para manter compatibilidade com a interface atual
     const flashcards = obterFlashcards();
-    // Os campos antigos também são gravados para preservar a compatibilidade da base local.
-    flashcards.push({ deck: baralho, front: frente, back: verso, category: baralho, word: frente, meaning: verso, status: 'new' });
-    localStorage.setItem('meusFlashcards', JSON.stringify(flashcards));
+
+    flashcards.push({
+        id: data.id,
+        user_id: userId,
+        baralho_id: dadosBaralho.id,
+        deck: baralho,
+        front: frente,
+        back: verso,
+        category: baralho,
+        word: frente,
+        meaning: verso,
+        status: 'new'
+    });
+
+    localStorage.setItem(
+        'meusFlashcards',
+        JSON.stringify(flashcards)
+    );
 
     document.getElementById('flashcard-frente').value = '';
     document.getElementById('flashcard-verso').value = '';
+
     aviso.textContent = 'Card added';
+
     document.getElementById('flashcard-frente').focus();
 }
 
@@ -1396,3 +1842,75 @@ if (imgGato && uploadGato) {
     });
 }
 
+async function excluirBaralho(baralho) {
+    const confirmar = confirm(
+        `Tem certeza de que deseja excluir o baralho "${baralho}" e todos os seus flashcards?`
+    );
+
+    if (!confirmar) return;
+
+    const supabase = getSupabaseClient();
+    const userId = await getCurrentUserId();
+
+    if (!supabase || !userId) {
+        alert('Você precisa estar autenticada para excluir um baralho.');
+        return;
+    }
+
+    // Buscar o baralho do usuário
+    const { data: baralhoEncontrado, error: erroBusca } = await supabase
+        .from('baralhos')
+        .select('id')
+        .eq('nome', baralho)
+        .eq('user_id', userId)
+        .single();
+
+    if (erroBusca || !baralhoEncontrado) {
+        console.error('Erro ao encontrar baralho:', erroBusca);
+        alert('Não foi possível encontrar o baralho.');
+        return;
+    }
+
+    // Excluir os flashcards associados
+    const { error: erroFlashcards } = await supabase
+        .from('flashcards')
+        .delete()
+        .eq('baralho_id', baralhoEncontrado.id)
+        .eq('user_id', userId);
+
+    if (erroFlashcards) {
+        console.error('Erro ao excluir flashcards:', erroFlashcards);
+        alert('Não foi possível excluir os flashcards do baralho.');
+        return;
+    }
+
+    // Excluir o baralho
+    const { error: erroBaralho } = await supabase
+        .from('baralhos')
+        .delete()
+        .eq('id', baralhoEncontrado.id)
+        .eq('user_id', userId);
+
+    if (erroBaralho) {
+        console.error('Erro ao excluir baralho:', erroBaralho);
+        alert('Não foi possível excluir o baralho.');
+        return;
+    }
+
+    // Atualizar o cache local
+    const baralhos = obterBaralhos().filter(
+        item => item.nome !== baralho
+    );
+
+    localStorage.setItem('meusBaralhos', JSON.stringify(baralhos));
+
+    const flashcards = obterFlashcards().filter(
+        card => card.baralho_id !== baralhoEncontrado.id
+    );
+
+    localStorage.setItem('meusFlashcards', JSON.stringify(flashcards));
+
+    alert('Baralho excluído com sucesso!');
+
+    mostrarBaralhos();
+}
