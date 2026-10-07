@@ -11,7 +11,7 @@ A flexible English self-study framework focused on **active vocabulary use, writ
 Designed to make English practice more manageable, reduce unnecessary cognitive overload, and help learners build consistency at their own pace.
 
 <p align="center">
-  <a href="https://vihari2.github.io/output-first-english/"><strong>🚀 Try the Live Demo</strong></a>
+  <a href="https://vihari2.github.io/english-with-adhd/"><strong>🚀 Try the Live Demo</strong></a>
 </p>
 
 <p align="center">
