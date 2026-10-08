@@ -4,7 +4,8 @@ const resourcePages = {
     'writing-journal.html': { title: 'Writing Journal', render: renderizarWritingJournal },
     'coursebook.html': { title: 'My Coursebook', render: renderizarCoursebook },
     'resources.html': { title: 'Other Resources', render: renderizarOtherResources },
-    'pomodoro.html': { title: 'Pomodoro', render: renderizarPomodoro }
+    'pomodoro.html': { title: 'Pomodoro', render: renderizarPomodoro },
+    'profile.html': { title: 'Profile', render: renderizarPerfil }
 };
 
 function renderizarPaginaRecurso() {

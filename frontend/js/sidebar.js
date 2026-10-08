@@ -20,29 +20,6 @@
   document.body.insertAdjacentHTML("afterbegin", sidebarMarkup);
   document.body.classList.add("sidebar-enabled");
 
-  const profileEditor = document.createElement("div");
-  profileEditor.className = "profile-editor-overlay";
-  profileEditor.id = "profile-editor";
-  profileEditor.hidden = true;
-  profileEditor.innerHTML = `
-    <section class="profile-editor-panel" role="dialog" aria-modal="true" aria-labelledby="profile-editor-title">
-      <h2 id="profile-editor-title">Edit profile</h2>
-      <label for="profile-name-input">Name</label>
-      <input id="profile-name-input" type="text" maxlength="60" autocomplete="name">
-      <label for="profile-avatar-input">Avatar</label>
-      <input id="profile-avatar-input" type="file" accept="image/*" onchange="previewProfileAvatar(this)">
-      <img id="profile-avatar-preview" class="profile-avatar-preview" alt="Avatar preview" hidden>
-      <p id="profile-editor-status" role="status" aria-live="polite"></p>
-      <div class="profile-editor-actions">
-        <button type="button" class="profile-cancel-button" onclick="closeProfileEditor()">Cancel</button>
-        <button type="button" id="profile-save-button" class="profile-save-button" onclick="saveAccountProfile()">Save</button>
-      </div>
-    </section>`;
-  profileEditor.addEventListener("click", (event) => {
-    if (event.target === profileEditor) closeProfileEditor();
-  });
-  document.body.appendChild(profileEditor);
-
   // Keep the audio state between the site's regular page loads. The player is
   // rebuilt on each page, while sessionStorage carries its position and state.
   const player = document.createElement("section");
@@ -129,7 +106,7 @@
   // this document alive also keeps the exact same audio element playing.
   const appPages = new Set([
     "dashboard.html", "coursebook.html", "flashcards.html", "speaking.html",
-    "writing-journal.html", "pomodoro.html", "resources.html"
+    "writing-journal.html", "pomodoro.html", "resources.html", "profile.html"
   ]);
 
   async function navigateTo(url, addHistory = true) {
@@ -140,7 +117,7 @@
       const response = await fetch(url.href);
       if (!response.ok) throw new Error(`Page request failed: ${response.status}`);
       const nextDocument = new DOMParser().parseFromString(await response.text(), "text/html");
-      const persistent = new Set([sidebar, toggle, player, profileEditor]);
+      const persistent = new Set([sidebar, toggle, player]);
 
       Array.from(document.body.children).forEach((child) => {
         if (!persistent.has(child)) child.remove();
@@ -172,7 +149,16 @@
         window.Home?.init();
         aplicarTemaSalvo();
         loadProfileData();
-      } else if (typeof renderizarPaginaRecurso === "function") {
+      } else {
+        if (typeof renderizarPaginaRecurso !== "function") {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "js/resource-page.js";
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+          });
+        }
         renderizarPaginaRecurso();
       }
     } catch (error) {

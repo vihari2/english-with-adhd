@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -8,9 +8,11 @@
   <link rel="icon" type="image/png" href="Images/favicon.png">
 </head>
 <body class="resource-page" data-page="writing-journal.html">
-  <div class="resource-topbar"><div class="account-summary" aria-label="User profile"><img class="account-avatar" alt="" hidden><span class="account-avatar-fallback" aria-hidden="true">U</span><span class="account-name">User</span><button class="edit-account-button" type="button" onclick="openProfileEditor()">Edit profile</button></div><button id="logout-btn" onclick="signOut()">Sign out</button></div>
+  <div class="resource-topbar">
+    <button id="logout-btn" onclick="signOut()">Sign out</button>
+  </div>
   <main class="resource-main">
-    <a class="back-dashboard" href="dashboard.html">← Dashboard</a>
+    <a class="back-dashboard" href="dashboard.html">&larr; Dashboard</a>
     <h1 id="page-title">Writing Journal</h1>
     <section id="page-content" class="resource-content" aria-live="polite"></section>
   </main>

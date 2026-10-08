@@ -277,23 +277,35 @@ function updateAccountSummary() {
     });
 }
 
-function openProfileEditor() {
-    const editor = document.getElementById('profile-editor');
-    if (!editor) return;
-    document.getElementById('profile-name-input').value = appStorage.getItem('nomeUsuario') || '';
+function renderizarPerfil(container) {
+    if (!container) return;
+    const name = appStorage.getItem('nomeUsuario') || 'User';
     const avatarUrl = appStorage.getItem('fotoPerfilCustom');
-    const preview = document.getElementById('profile-avatar-preview');
-    preview.hidden = !avatarUrl;
-    if (avatarUrl) preview.src = avatarUrl;
-    document.getElementById('profile-avatar-input').value = '';
-    document.getElementById('profile-editor-status').textContent = '';
-    editor.hidden = false;
-    document.getElementById('profile-name-input').focus();
+    const safeName = escapeProfileHtml(name);
+    const safeAvatarUrl = escapeProfileHtml(avatarUrl || '');
+    container.innerHTML = `
+      <section class="profile-page">
+        <h2>Profile settings</h2>
+        <p>Update the name and avatar shown in your account.</p>
+        <div class="profile-current">
+          <img id="profile-avatar-current" class="profile-avatar-current" alt="Current avatar" ${avatarUrl ? `src="${safeAvatarUrl}"` : 'hidden'}>
+          <span id="profile-avatar-fallback" class="profile-avatar-fallback" ${avatarUrl ? 'hidden' : ''}>${safeName.trim().charAt(0).toUpperCase() || 'U'}</span>
+          <strong>${safeName}</strong>
+        </div>
+        <label for="profile-name-input">Name</label>
+        <input id="profile-name-input" class="profile-name-input" type="text" maxlength="60" autocomplete="name" value="${safeName}">
+        <label for="profile-avatar-input">Upload avatar</label>
+        <input id="profile-avatar-input" class="profile-avatar-input" type="file" accept="image/*" onchange="previewProfileAvatar(this)">
+        <img id="profile-avatar-preview" class="profile-avatar-preview" alt="New avatar preview" hidden>
+        <p id="profile-editor-status" class="profile-editor-status" role="status" aria-live="polite"></p>
+        <button type="button" id="profile-save-button" class="profile-save-button" onclick="saveAccountProfile()">Save changes</button>
+      </section>`;
 }
 
-function closeProfileEditor() {
-    const editor = document.getElementById('profile-editor');
-    if (editor) editor.hidden = true;
+function escapeProfileHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[character]);
 }
 
 function previewProfileAvatar(input) {
@@ -347,7 +359,21 @@ async function saveAccountProfile() {
         if (isSupabaseConfigured()) await saveNameToSupabase(name);
         appStorage.setItem('nomeUsuario', name);
         updateAccountSummary();
-        closeProfileEditor();
+        const currentAvatar = document.getElementById('profile-avatar-current');
+        const fallback = document.getElementById('profile-avatar-fallback');
+        const avatarUrl = appStorage.getItem('fotoPerfilCustom');
+        const nameElement = document.querySelector('.profile-current strong');
+        if (nameElement) nameElement.textContent = name;
+        if (currentAvatar && fallback && avatarUrl) {
+            currentAvatar.src = avatarUrl;
+            currentAvatar.hidden = false;
+            fallback.hidden = true;
+        } else if (currentAvatar && fallback) {
+            currentAvatar.hidden = true;
+            fallback.hidden = false;
+            fallback.textContent = name.trim().charAt(0).toUpperCase() || 'U';
+        }
+        status.textContent = 'Profile saved.';
     } catch (error) {
         console.error('Could not save profile:', error);
         status.textContent = 'Could not save. Check your connection and try again.';

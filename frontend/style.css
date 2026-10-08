@@ -1166,20 +1166,20 @@ body.resource-page {
 .account-avatar-fallback { display: flex; align-items: center; justify-content: center; background: #e5f2e8; color: #175b43; }
 .account-avatar-fallback[hidden], .account-avatar[hidden] { display: none; }
 .account-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.edit-account-button, .profile-save-button { border: 0; border-radius: 8px; padding: 8px 11px; background: #175b43; color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; }
+.edit-account-button, .profile-save-button { display: inline-block; border: 0; border-radius: 8px; padding: 8px 11px; background: #175b43; color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; text-decoration: none; }
 .edit-account-button:hover, .profile-save-button:hover { background: #124936; }
 .profile-save-button:disabled { opacity: .65; cursor: wait; }
-.profile-editor-overlay[hidden] { display: none; }
-.profile-editor-overlay { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px; background: rgba(16, 33, 28, .42); }
-.profile-editor-panel { width: min(100%, 420px); padding: 24px; border-radius: 16px; background: #fff; color: #26344a; box-shadow: 0 16px 48px rgba(0, 0, 0, .2); }
-.profile-editor-panel h2 { margin: 0 0 18px; color: #10213b; }
-.profile-editor-panel label { display: block; margin: 12px 0 6px; font-size: 14px; font-weight: 600; }
-.profile-editor-panel input[type="text"], .profile-editor-panel input[type="file"] { width: 100%; padding: 10px; border: 1px solid #d5ddd7; border-radius: 8px; font: inherit; }
-.profile-avatar-preview { display: block; width: 72px; height: 72px; margin-top: 12px; border-radius: 50%; object-fit: cover; }
+.profile-page { max-width: 620px; margin: 0 auto; color: #26344a; }
+.profile-page h2 { margin-top: 0; color: #10213b; }
+.profile-page label { display: block; margin: 18px 0 7px; font-weight: 600; }
+.profile-page input[type="text"], .profile-page input[type="file"] { width: 100%; padding: 10px; border: 1px solid #d5ddd7; border-radius: 8px; font: inherit; }
+.profile-current { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.profile-avatar-current, .profile-avatar-fallback { display: grid; width: 72px; height: 72px; place-items: center; border-radius: 50%; object-fit: cover; }
+.profile-avatar-fallback { background: #e5f2e8; color: #175b43; font-size: 1.5rem; }
+.profile-avatar-current[hidden], .profile-avatar-fallback[hidden], .profile-avatar-preview[hidden] { display: none; }
+.profile-avatar-preview { display: block; width: 88px; height: 88px; margin-top: 14px; border-radius: 50%; object-fit: cover; }
 .profile-avatar-preview[hidden] { display: none; }
-#profile-editor-status { min-height: 1.2em; margin: 12px 0; color: #a33; font-size: 13px; }
-.profile-editor-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.profile-cancel-button { border: 0; border-radius: 8px; padding: 8px 11px; background: #e5f2e8; color: #175b43; cursor: pointer; font: inherit; font-size: 13px; }
+.profile-editor-status { min-height: 1.2em; margin: 14px 0; color: #64748b; font-size: 14px; }
 
 .resource-topbar > #logout-btn {
   padding: 8px 15px;
@@ -1194,9 +1194,9 @@ body.resource-page {
 .dark-mode .resource-content { background: #242735; color: #e5e7eb; }
 .dark-mode .account-summary { color: #e5e7eb; }
 .dark-mode .account-avatar-fallback { background: #263b32; color: #a7d9bb; }
-.dark-mode .profile-editor-panel { background: #242735; color: #e5e7eb; }
-.dark-mode .profile-editor-panel h2 { color: #e5e7eb; }
-.dark-mode .profile-editor-panel input { border-color: #4b5263; background: #1b1e29; color: #f3f4f6; }
+.dark-mode .profile-page, .dark-mode .profile-page h2 { color: #e5e7eb; }
+.dark-mode .profile-page input { border-color: #4b5263; background: #1b1e29; color: #f3f4f6; }
+.dark-mode .profile-avatar-fallback { background: #263b32; color: #a7d9bb; }
 
 @media (max-width: 560px) {
   .resource-topbar, .account-topbar { right: 8px; gap: 6px; }
@@ -1663,4 +1663,348 @@ body.sidebar-enabled .menu-toggle {
 }
 
 
+/* ========================================
+   Writing Journal
+======================================== */
 
+.journal-page {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  color: #343434;
+}
+
+.journal-header {
+  margin-bottom: 22px;
+}
+
+.journal-header h2 {
+  margin: 0 0 6px;
+  font-size: 1.65rem;
+}
+
+.journal-header p {
+  margin: 0;
+  color: #707070;
+}
+
+.journal-paper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  padding: 28px 28px 24px 58px;
+  overflow: hidden;
+  border: 1px solid #e5d9bd;
+  border-radius: 5px;
+  background-color: #fffdf4;
+  background-image:
+    linear-gradient(
+      to right,
+      transparent 0,
+      transparent 38px,
+      #e8a0a0 38px,
+      #e8a0a0 40px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 31px,
+      #b9d5ed 31px,
+      #b9d5ed 32px
+    );
+  box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+}
+
+.journal-title {
+  width: 100%;
+  min-height: 38px;
+  margin-bottom: 8px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #303746;
+  font: 600 1.15rem/32px inherit;
+}
+
+.journal-title::placeholder {
+  color: #98958b;
+  font-weight: 400;
+}
+
+.journal-content {
+  display: block;
+  width: 100%;
+  min-height: 224px;
+  max-height: 480px;
+  margin: 0;
+  padding: 0;
+  resize: none;
+  overflow-y: hidden;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #303746;
+  font: 400 1rem/32px inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.journal-title:focus-visible { outline: none; }
+.journal-content:focus-visible { outline: none; }
+
+.journal-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.journal-toolbar button,
+.journal-new-button,
+.journal-modal-close {
+  min-height: 42px;
+  padding: 10px 17px;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.journal-toolbar button:hover,
+.journal-new-button:hover {
+  background: #f0f3f7;
+}
+
+.journal-toolbar .journal-save-button {
+  border-color: #175b43;
+  background: #175b43;
+  color: #fff;
+}
+
+.journal-toolbar .journal-save-button:hover {
+  background: #124936;
+}
+
+.journal-toolbar button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.journal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.journal-save-status {
+  margin: 0;
+  color: #656565;
+  font-size: 0.9rem;
+}
+
+.journal-new-button {
+  white-space: nowrap;
+}
+
+/* Notes modal */
+
+.journal-modal[hidden] {
+  display: none !important;
+}
+
+.journal-modal {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.journal-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(20 25 32 / 55%);
+}
+
+.journal-modal-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: min(700px, 85dvh);
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 60px rgb(0 0 0 / 20%);
+}
+
+.journal-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.journal-modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.journal-modal-close {
+  display: grid;
+  width: 40px;
+  min-height: 40px;
+  place-items: center;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.journal-notes-search {
+  width: 100%;
+  min-height: 42px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.journal-notes-search:focus-visible {
+  border-color: #175b43;
+  outline: none;
+}
+
+.journal-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 5px 2px 0;
+}
+
+.journal-note-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #e4e4e4;
+  border-radius: 9px;
+  background: #fff;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+}
+
+.journal-note-item:hover,
+.journal-note-item.active {
+  border-color: #a8cbb4;
+  background: #f1f7f2;
+}
+
+.journal-note-item strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.journal-note-item span {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  color: #666;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.journal-note-item small {
+  color: #858585;
+}
+
+.journal-empty-message {
+  padding: 20px 8px;
+  color: #777;
+  text-align: center;
+}
+
+body.journal-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .journal-paper {
+    min-height: 260px;
+    padding: 20px 14px 20px 45px;
+    background-image:
+      linear-gradient(
+        to right,
+        transparent 0,
+        transparent 29px,
+        #e8a0a0 29px,
+        #e8a0a0 31px,
+        transparent 31px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        #b9d5ed 31px,
+        #b9d5ed 32px
+      );
+  }
+
+  .journal-content {
+    max-height: 360px;
+    min-height: 224px;
+  }
+
+  .journal-toolbar button {
+    flex: 1;
+  }
+
+  .journal-footer {
+    align-items: flex-start;
+  }
+
+  .journal-modal {
+    padding: 12px;
+  }
+
+  .journal-modal-dialog {
+    max-height: 88dvh;
+    padding: 16px;
+  }
+}
+
+.journal-title {
+  /* mantenha as demais propriedades */
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.journal-content {
+  /* mantenha as demais propriedades */
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 32px;
+}

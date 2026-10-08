@@ -1,17 +1,25 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flashcards - English with ADHD</title>
+  <title>Profile - English with ADHD</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="Images/favicon.png">
 </head>
-<body class="resource-page" data-page="flashcards.html">
-  <div class="resource-topbar"><div class="account-summary" aria-label="User profile"><img class="account-avatar" alt="" hidden><span class="account-avatar-fallback" aria-hidden="true">U</span><span class="account-name">User</span><a class="edit-account-button" href="profile.html">Edit profile</a></div><button id="logout-btn" onclick="signOut()">Sign out</button></div>
+<body class="resource-page" data-page="profile.html">
+  <div class="resource-topbar">
+    <div class="account-summary" aria-label="User profile">
+      <img class="account-avatar" alt="" hidden>
+      <span class="account-avatar-fallback" aria-hidden="true">U</span>
+      <span class="account-name">User</span>
+      <a class="edit-account-button" href="profile.html" aria-current="page">Profile</a>
+    </div>
+    <button id="logout-btn" onclick="signOut()">Sign out</button>
+  </div>
   <main class="resource-main">
-    <a class="back-dashboard" href="dashboard.html">← Dashboard</a>
-    <h1 id="page-title">Flashcards</h1>
+    <a class="back-dashboard" href="dashboard.html">&larr; Dashboard</a>
+    <h1 id="page-title">Profile</h1>
     <section id="page-content" class="resource-content" aria-live="polite"></section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
