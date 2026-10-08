@@ -15,7 +15,7 @@ Designed to make English practice more manageable, reduce unnecessary cognitive 
 </p>
 
 <p align="center">
-  <img src="Images/image.png" alt="English with ADHD dashboard" width="600">
+  <img src="frontend/Images/image.png" alt="English with ADHD dashboard" width="600">
 </p>
 
 ## 🎯 The Method
@@ -23,7 +23,7 @@ Designed to make English practice more manageable, reduce unnecessary cognitive 
 **Coursebook → Flashcards → Speak or Journal → AI Feedback → Spaced Review**
 
 <p align="center">
-  <img src="Images/flowchart.png" alt="Output-First English study workflow" width="600">
+  <img src="frontend/Images/flowchart.png" alt="Output-First English study workflow" width="600">
 </p>
 
 The framework follows a simple learning cycle:
