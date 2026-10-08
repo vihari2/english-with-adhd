@@ -181,39 +181,31 @@ async function handleImageUpload(input) {
     }
 }
 
-async function saveNameToSupabase() {
+async function saveNameToSupabase(nome) {
     const userId = await getCurrentUserId();
     if (!userId || !isSupabaseConfigured()) return;
-
-    const nomeTag = document.getElementById('nome-txt');
-    const nome = nomeTag ? nomeTag.textContent.trim() || 'Your Name Here' : 'Your Name Here';
-    appStorage.setItem('nomeUsuario', nome);
 
     const client = getSupabaseClient();
     const { error } = await client
         .from('profiles')
         .upsert({ user_id: userId, nome }, { onConflict: 'user_id' });
 
-    if (error) {
-        console.error(error);
-    }
+    if (error) throw error;
 }
 
 async function saveAvatarToSupabase(file) {
-    const userId = getCurrentUserId();
-    if (!userId || !isSupabaseConfigured() || !file) return;
+    const userId = await getCurrentUserId();
+    if (!userId || !isSupabaseConfigured() || !file) throw new Error('Could not identify the signed-in user.');
 
-    const fileName = `${userId}-${Date.now()}.png`;
+    const extension = file.name?.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `${userId}-${Date.now()}.${extension}`;
     const client = getSupabaseClient();
 
     const { error: uploadError } = await client.storage
         .from('avatars')
         .upload(fileName, file, { upsert: true });
 
-    if (uploadError) {
-        console.error(uploadError);
-        return;
-    }
+    if (uploadError) throw uploadError;
 
     const { data: publicUrlData } = client.storage
         .from('avatars')
@@ -221,15 +213,12 @@ async function saveAvatarToSupabase(file) {
 
     const avatarUrl = publicUrlData?.publicUrl;
 
-    if (avatarUrl) {
-        const { error } = await client
-            .from('profiles')
-            .upsert({ user_id: userId, avatar_url: avatarUrl }, { onConflict: 'user_id' });
-
-        if (error) {
-            console.error(error);
-        }
-    }
+    if (!avatarUrl) throw new Error('Could not create a public URL for the avatar.');
+    const { error } = await client
+        .from('profiles')
+        .upsert({ user_id: userId, avatar_url: avatarUrl }, { onConflict: 'user_id' });
+    if (error) throw error;
+    return avatarUrl;
 }
 
 function aplicarTemaSalvo() {
@@ -263,6 +252,107 @@ function loadProfileData() {
     const gatoSalvo = appStorage.getItem('fotoGatoCustom');
     if (gatoSalvo && imgGato) {
         imgGato.src = gatoSalvo;
+    }
+
+    updateAccountSummary();
+}
+
+function updateAccountSummary() {
+    const name = appStorage.getItem('nomeUsuario') || 'User';
+    const avatarUrl = appStorage.getItem('fotoPerfilCustom');
+    document.querySelectorAll('.account-summary').forEach((summary) => {
+        const nameElement = summary.querySelector('.account-name');
+        const avatar = summary.querySelector('.account-avatar');
+        const fallback = summary.querySelector('.account-avatar-fallback');
+        if (nameElement) nameElement.textContent = name;
+        if (avatar && fallback && avatarUrl) {
+            avatar.src = avatarUrl;
+            avatar.hidden = false;
+            fallback.hidden = true;
+        } else if (avatar && fallback) {
+            avatar.hidden = true;
+            fallback.hidden = false;
+            fallback.textContent = name.trim().charAt(0).toUpperCase() || 'U';
+        }
+    });
+}
+
+function openProfileEditor() {
+    const editor = document.getElementById('profile-editor');
+    if (!editor) return;
+    document.getElementById('profile-name-input').value = appStorage.getItem('nomeUsuario') || '';
+    const avatarUrl = appStorage.getItem('fotoPerfilCustom');
+    const preview = document.getElementById('profile-avatar-preview');
+    preview.hidden = !avatarUrl;
+    if (avatarUrl) preview.src = avatarUrl;
+    document.getElementById('profile-avatar-input').value = '';
+    document.getElementById('profile-editor-status').textContent = '';
+    editor.hidden = false;
+    document.getElementById('profile-name-input').focus();
+}
+
+function closeProfileEditor() {
+    const editor = document.getElementById('profile-editor');
+    if (editor) editor.hidden = true;
+}
+
+function previewProfileAvatar(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    const status = document.getElementById('profile-editor-status');
+    if (!file.type.startsWith('image/')) {
+        status.textContent = 'Choose an image file.';
+        input.value = '';
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        status.textContent = 'The image must be smaller than 5 MB.';
+        input.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+        const preview = document.getElementById('profile-avatar-preview');
+        preview.src = reader.result;
+        preview.hidden = false;
+        status.textContent = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+async function saveAccountProfile() {
+    const name = document.getElementById('profile-name-input').value.trim();
+    const file = document.getElementById('profile-avatar-input').files?.[0];
+    const status = document.getElementById('profile-editor-status');
+    const saveButton = document.getElementById('profile-save-button');
+    if (!name) {
+        status.textContent = 'Enter your name before saving.';
+        return;
+    }
+
+    saveButton.disabled = true;
+    status.textContent = 'Saving…';
+    try {
+        if (file) {
+            const avatarUrl = isSupabaseConfigured()
+                ? await saveAvatarToSupabase(file)
+                : await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Could not read the image.'));
+                    reader.readAsDataURL(file);
+                });
+            appStorage.setItem('fotoPerfilCustom', avatarUrl);
+        }
+        if (isSupabaseConfigured()) await saveNameToSupabase(name);
+        appStorage.setItem('nomeUsuario', name);
+        updateAccountSummary();
+        closeProfileEditor();
+    } catch (error) {
+        console.error('Could not save profile:', error);
+        status.textContent = 'Could not save. Check your connection and try again.';
+    } finally {
+        saveButton.disabled = false;
     }
 }
 
@@ -313,7 +403,7 @@ function salvarNome() {
     if (!nomeTag) return;
     const nome = nomeTag.textContent.trim() || 'Your Name Here';
     appStorage.setItem('nomeUsuario', nome);
-    if (isSupabaseConfigured()) saveNameToSupabase();
+    if (isSupabaseConfigured()) saveNameToSupabase(nome).catch(console.error);
 }
 
 async function loadProfileFromSupabase() {
@@ -337,16 +427,17 @@ async function loadProfileFromSupabase() {
     // Carregar nome do usuário
     const nomeTxt = document.getElementById('nome-txt');
 
-    if (nomeTxt && data?.nome) {
-        nomeTxt.textContent = data.nome;
+    if (data?.nome) {
+        if (nomeTxt) nomeTxt.textContent = data.nome;
         appStorage.setItem('nomeUsuario', data.nome);
     }
 
     // Carregar foto de perfil
-    if (data?.avatar_url && fotoImg) {
-        fotoImg.src = data.avatar_url;
+    if (data?.avatar_url) {
+        if (fotoImg) fotoImg.src = data.avatar_url;
         appStorage.setItem('fotoPerfilCustom', data.avatar_url);
     }
+    updateAccountSummary();
 
     // Carregar imagem de fundo do Supabase
     if (data?.bg_type === 'image' && data?.bg_url) {

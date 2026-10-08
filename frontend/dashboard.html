@@ -18,7 +18,13 @@
             href="mailto:vitoriafmq@gmail.com">vitoriafmq@gmail.com</a>
     </div>
 
-    <div style="position: absolute; top: 15px; right: 15px;">
+    <div class="account-topbar">
+        <div class="account-summary" aria-label="User profile">
+            <img class="account-avatar" alt="" hidden>
+            <span class="account-avatar-fallback" aria-hidden="true">U</span>
+            <span class="account-name">User</span>
+            <button class="edit-account-button" type="button" onclick="openProfileEditor()">Edit profile</button>
+        </div>
         <button id="logout-btn" onclick="signOut()"
             style="padding: 8px 15px; background-color: #dc2626; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em;">Sign
             out</button>
@@ -69,14 +75,60 @@
             <small style="display: block; color: #888; margin-top: 5px;">Max 5MB (PNG/JPG)</small>
         </div>
 
-
-
-
         <button onclick="closeConfigModal()" style="
         width: 100%; padding: 8px; background: #1a73e8; color: white;
         border: none; border-radius: 4px; margin-top: 15px; cursor: pointer;
     ">Fechar</button>
     </div>
+
+    <!-- Learning Path -->
+        <section class="learning-path" aria-labelledby="learning-path-title">
+            <h2 id="learning-path-title" class="learning-path-title">
+                YOUR LEARNING PATH
+            </h2>
+
+            <div class="learning-path-steps">
+
+                <div class="learning-path-step" data-step="coursebook">
+                    <div class="learning-path-icon">📘</div>
+                    <span class="learning-path-label">Coursebook</span>
+                </div>
+
+                <div class="learning-path-connector"></div>
+
+                <div class="learning-path-step" data-step="flashcards">
+                    <div class="learning-path-icon">🗂️</div>
+                    <span class="learning-path-label">Flashcards</span>
+                </div>
+
+                <div class="learning-path-connector"></div>
+
+                <div class="learning-path-step" data-step="practice">
+                    <div class="learning-path-icon">✍️</div>
+                    <span class="learning-path-label">Practice</span>
+                </div>
+
+                <div class="learning-path-connector"></div>
+
+                <div class="learning-path-step" data-step="feedback">
+                    <div class="learning-path-icon">✨</div>
+                    <span class="learning-path-label">AI Feedback</span>
+                </div>
+
+                <div class="learning-path-connector"></div>
+
+                <div class="learning-path-step" data-step="review">
+                    <div class="learning-path-icon">🔄</div>
+                    <span class="learning-path-label">Spaced Review</span>
+                </div>
+
+            </div>
+
+            <p class="learning-path-note">
+                Speaking goes directly to Spaced Review.
+                Writing Journal includes AI Feedback before review.
+            </p>
+        </section>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
