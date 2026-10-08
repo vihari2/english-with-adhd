@@ -579,12 +579,41 @@ async function adicionarFlashcard(evento) {
         JSON.stringify(flashcards)
     );
 
+    // Depois que o cartão for salvo, a home oferece Speaking ou Journal.
+    await avancarParaPractice();
+
     document.getElementById('flashcard-frente').value = '';
     document.getElementById('flashcard-verso').value = '';
 
     aviso.textContent = 'Card added';
 
     document.getElementById('flashcard-frente').focus();
+}
+
+async function avancarParaPractice() {
+    if (window.Home?.completeFlashcards) {
+        await window.Home.completeFlashcards();
+        return;
+    }
+
+    try {
+        const client = getSupabaseClient();
+        const userId = await getCurrentUserId();
+        if (!client || !userId) return;
+
+        const { error } = await client
+            .from('learning_progress')
+            .upsert({
+                user_id: userId,
+                current_step: 'practice',
+                practice_choice: null,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Could not advance the learning path to practice:', error);
+    }
 }
 
 async function excluirBaralho(baralho) {

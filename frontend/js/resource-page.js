@@ -15,6 +15,24 @@ function renderizarPaginaRecurso() {
 
     document.title = `${page.title} - English with ADHD`;
     document.getElementById('page-title').textContent = page.title;
+    const pageName = window.location.pathname.split('/').pop();
+    document.querySelector('.guide-open-button')?.remove();
+    if (window.showPageGuide && ['coursebook.html', 'speaking.html', 'writing-journal.html'].includes(pageName)) {
+        const title = document.getElementById('page-title');
+        let headingRow = title.closest('.resource-heading-row');
+        if (!headingRow) {
+            headingRow = document.createElement('div');
+            headingRow.className = 'resource-heading-row';
+            title.before(headingRow);
+            headingRow.appendChild(title);
+        }
+        const guideButton = document.createElement('button');
+        guideButton.type = 'button';
+        guideButton.className = 'guide-open-button';
+        guideButton.textContent = 'More information';
+        guideButton.addEventListener('click', () => window.showPageGuide(pageName));
+        headingRow.appendChild(guideButton);
+    }
     page.render(content);
 }
 

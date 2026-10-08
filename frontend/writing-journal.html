@@ -9,6 +9,12 @@
 </head>
 <body class="resource-page" data-page="writing-journal.html">
   <div class="resource-topbar">
+    <div class="account-summary" aria-label="User profile">
+      <img class="account-avatar" alt="" hidden>
+      <span class="account-avatar-fallback" aria-hidden="true">U</span>
+      <span class="account-name">User</span>
+      <a class="edit-account-button" href="profile.html">Edit profile</a>
+    </div>
     <button id="logout-btn" onclick="signOut()">Sign out</button>
   </div>
   <main class="resource-main">
@@ -28,6 +34,7 @@
   <script src="js/coursebook.js"></script>
   <script src="js/otherResources.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/guide-modal.js"></script>
   <script src="js/resource-page.js"></script>
   <script src="js/sidebar.js"></script>
 </body>
