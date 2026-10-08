@@ -779,10 +779,8 @@ textarea {
     .tabela-flashcards td {
         white-space: nowrap;
     }
-}
 
-/* Ajustes específicos da experiência de flashcards em telas menores. */
-@media (max-width: 768px) {
+    /* Flashcard responsive layout */
     .flashcards-header {
         margin-bottom: 16px;
     }
@@ -2163,4 +2161,463 @@ body.journal-modal-open {
     padding: 16px;
   }
 }
+
+
+/* =========================================
+   SPEAKING PRACTICE
+   ========================================= */
+
+.speaking-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 100%;
+    color: var(--text-color, #252525);
+}
+
+.speaking-header {
+    margin-bottom: 2px;
+}
+
+.speaking-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--primary-color, #17634d);
+}
+
+.speaking-header h2 {
+    margin: 8px 0;
+    font-size: clamp(1.6rem, 3vw, 2rem);
+}
+
+.speaking-header p,
+.speaking-section-heading p,
+.shadowing-intro p {
+    margin: 5px 0 0;
+    line-height: 1.6;
+    color: var(--secondary-text, #707070);
+}
+
+.speaking-section {
+    padding: 24px;
+    border: 1px solid var(--border-color, #e7e7e7);
+    border-radius: 16px;
+    background: var(--card-background, #fff);
+    min-width: 0;
+}
+
+.speaking-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    min-width: 0;
+}
+
+.speaking-section-heading > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+.speaking-section-heading h3 {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.speaking-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #edf5f0;
+    color: #17634d;
+    font-size: 1.35rem;
+}
+
+.speaking-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 10px 15px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.speaking-button-primary {
+    background: #17634d;
+    color: #fff;
+}
+
+.speaking-button-primary:hover,
+.speaking-button:hover {
+    filter: brightness(0.96);
+}
+
+.speaking-button-secondary {
+    background: var(--card-background, #fff);
+    border-color: var(--border-color, #ddd);
+    color: inherit;
+}
+
+.meet-link-form label,
+.meet-session-fields label,
+.speaking-note-field,
+.speaking-note-header label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.meet-link-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.speaking-page input,
+.speaking-page select,
+.speaking-page textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--border-color, #dedede);
+    border-radius: 8px;
+    background: var(--input-background, #fff);
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+.speaking-page input:focus,
+.speaking-page select:focus,
+.speaking-page textarea:focus {
+    outline: 2px solid #b7d8c8;
+    outline-offset: 1px;
+    border-color: #17634d;
+}
+
+.meet-link-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.speaking-message {
+    font-size: 0.85rem;
+    color: var(--secondary-text, #707070);
+}
+
+.meet-sessions-list,
+.speaking-notes-list,
+.shadowing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.meet-session-card,
+.speaking-note-card,
+.shadowing-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--border-color, #e7e7e7);
+    border-radius: 12px;
+    background: var(--card-background, #fff);
+}
+
+.meet-session-card-header,
+.speaking-note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.meet-session-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.meet-session-title input {
+    border: none;
+    padding: 4px 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.session-date {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.82rem;
+    color: var(--secondary-text, #707070);
+}
+
+.meet-session-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+.session-topic-field {
+    grid-column: 1 / -1;
+}
+
+.meet-session-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color, #eee);
+}
+
+.speaking-delete-button {
+    padding: 7px 10px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--secondary-text, #707070);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.speaking-delete-button:hover {
+    border-color: #c66;
+    color: #b33;
+}
+
+.speaking-note-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.speaking-note-header {
+    align-items: flex-end;
+}
+
+.speaking-note-header label {
+    flex: 1;
+    max-width: 240px;
+}
+
+.speaking-note-field textarea {
+    min-height: 76px;
+    resize: vertical;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.speaking-empty-state {
+    padding: 32px 20px;
+    border: 1px dashed var(--border-color, #d8d8d8);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.speaking-empty-icon {
+    margin-bottom: 12px;
+    color: #17634d;
+    font-size: 1.8rem;
+}
+
+.speaking-empty-state h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+}
+
+.speaking-empty-state p {
+    margin: 0 auto 18px;
+    max-width: 420px;
+    color: var(--secondary-text, #707070);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.shadowing-intro {
+    margin: -8px 0 18px;
+}
+
+.shadowing-category {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #17634d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.shadowing-sentence {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.shadowing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+    .speaking-page {
+        gap: 16px;
+    }
+
+    .speaking-section {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .speaking-section-heading {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .speaking-section-heading > .speaking-button {
+        width: 100%;
+    }
+
+    .meet-link-row {
+        flex-direction: column;
+    }
+
+    .meet-session-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .session-topic-field {
+        grid-column: auto;
+    }
+
+    .meet-session-card,
+    .speaking-note-card,
+    .shadowing-card {
+        padding: 14px;
+    }
+
+    .meet-session-footer > button {
+        flex: 1;
+    }
+}
+
+
+/* Shadowing Practice */
+
+.shadowing-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.shadowing-summary-card {
+    padding: 16px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shadowing-summary-card span {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #666);
+}
+
+.shadowing-summary-card strong {
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.shadowing-card {
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 14px;
+}
+
+.shadowing-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.shadowing-card-header h4 {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.shadowing-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.shadowing-fields label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    font-size: 0.9rem;
+}
+
+.shadowing-fields input,
+.shadowing-fields select,
+.shadowing-fields textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 8px;
+    font: inherit;
+}
+
+.shadowing-fields textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.shadowing-full-field {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+    .shadowing-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .shadowing-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .shadowing-full-field {
+        grid-column: auto;
+    }
+}
+
 
