@@ -46,6 +46,33 @@ function adicionarLivroCoursebook() {
     livros.push({ nome: '', parada: '', data: dataHoje });
     appStorage.setItem('meuCoursebook', JSON.stringify(livros));
     carregarCoursebookSalvo();
+    avancarParaFlashcards();
+}
+
+async function avancarParaFlashcards() {
+    if (window.Home?.completeCoursebook) {
+        await window.Home.completeCoursebook();
+        return;
+    }
+
+    try {
+        const client = getSupabaseClient();
+        const userId = await getCurrentUserId();
+        if (!client || !userId) return;
+
+        const { error } = await client
+            .from('learning_progress')
+            .upsert({
+                user_id: userId,
+                current_step: 'flashcards',
+                practice_choice: null,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Could not advance the learning path to flashcards:', error);
+    }
 }
 
 function salvarEdicaoCoursebook(index, campo, novoValor) {
@@ -60,4 +87,3 @@ function removerCoursebook(index) {
     appStorage.setItem('meuCoursebook', JSON.stringify(livros));
     carregarCoursebookSalvo();
 }
-
