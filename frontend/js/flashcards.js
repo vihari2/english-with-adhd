@@ -159,28 +159,29 @@ async function mostrarBaralhos() {
             <button
                 class="btn-criar-baralho"
                 id="btn-criar-baralho"
-                type="button">
+                type="button"
+                aria-expanded="false"
+                aria-controls="form-criar-baralho">
                 Criar baralho
             </button>
         </div>
 
-        <form id="form-criar-baralho">
+        <form id="form-criar-baralho" class="form-criar-baralho oculto">
             <label for="nome-novo-baralho">
                 Nome do baralho
             </label>
 
-            <input
-                type="text"
-                id="nome-novo-baralho"
-                placeholder="Ex.: Inglês"
-                required
-            >
-
-            <button type="submit">
-                Create
-            </button>
-
-            <p id="aviso-novo-baralho"></p>
+            <div class="criar-baralho-controles">
+                <input
+                    type="text"
+                    id="nome-novo-baralho"
+                    placeholder="Ex.: Inglês"
+                    required
+                >
+                <button class="btn-confirmar-baralho" type="submit">Create deck</button>
+                <button class="btn-cancelar-criar-baralho" type="button">Cancel</button>
+            </div>
+            <p id="aviso-novo-baralho" class="flashcard-aviso" role="status" aria-live="polite"></p>
         </form>
 
         <section class="lista-baralhos">
@@ -197,11 +198,11 @@ async function mostrarBaralhos() {
                                 data-baralho="${escaparHtml(baralho.nome)}"
                                 type="button">
 
-                                <span>
+                                <span class="baralho-nome">
                                     ${escaparHtml(baralho.nome)}
                                 </span>
 
-                                <span>
+                                <span class="baralho-contagem">
                                     ${quantidade} flashcards
                                 </span>
 
@@ -217,18 +218,27 @@ async function mostrarBaralhos() {
         .getElementById('form-criar-baralho')
         .addEventListener('submit', criarBaralho);
 
+    const formularioBaralho = document.getElementById('form-criar-baralho');
+    const botaoCriarBaralho = document.getElementById('btn-criar-baralho');
+    botaoCriarBaralho.addEventListener('click', () => {
+        const vaiAbrir = formularioBaralho.classList.contains('oculto');
+        formularioBaralho.classList.toggle('oculto', !vaiAbrir);
+        botaoCriarBaralho.setAttribute('aria-expanded', String(vaiAbrir));
+        if (vaiAbrir) document.getElementById('nome-novo-baralho').focus();
+    });
+    formularioBaralho.querySelector('.btn-cancelar-criar-baralho').addEventListener('click', () => {
+        formularioBaralho.classList.add('oculto');
+        botaoCriarBaralho.setAttribute('aria-expanded', 'false');
+        formularioBaralho.reset();
+        document.getElementById('aviso-novo-baralho').textContent = '';
+    });
+
     // Eventos para abrir cada baralho
     document.querySelectorAll('.baralho-item').forEach(botao => {
         botao.addEventListener('click', () => {
             abrirBaralho(botao.dataset.baralho);
         });
     });
-}
-
-function exibirCriacaoBaralho() {
-    const formulario = document.getElementById('form-criar-baralho');
-    formulario.classList.remove('oculto');
-    document.getElementById('nome-novo-baralho').focus();
 }
 
 async function criarBaralho(evento) {
@@ -260,12 +270,12 @@ async function criarBaralho(evento) {
         return;
     }
 
-    if (existente.length > 0) {
+    if ((existente?.length ?? 0) > 0) {
         aviso.textContent = 'This deck already exists';
         return;
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from('baralhos')
         .insert({
             user_id: userId,
@@ -297,9 +307,13 @@ async function criarBaralho(evento) {
     );
 
     campoNome.value = '';
-    aviso.textContent = 'Deck created';
-
     mostrarBaralhos();
+
+    const formularioAtualizado = document.getElementById('form-criar-baralho');
+    const botaoCriarAtualizado = document.getElementById('btn-criar-baralho');
+    formularioAtualizado.classList.remove('oculto');
+    botaoCriarAtualizado.setAttribute('aria-expanded', 'true');
+    document.getElementById('aviso-novo-baralho').textContent = 'Deck created';
 }
 
 function obterEstadoDoCard(card) {
