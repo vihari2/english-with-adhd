@@ -2116,6 +2116,16 @@ button:not(.coursebook-delete-button):not(.btn-remover):not(.btn-fechar):not(.mu
   background: #124936;
 }
 
+.journal-toolbar .journal-notes-button {
+  border-color: #175b43;
+  background: transparent;
+  color: #175b43;
+}
+
+.journal-toolbar .journal-notes-button:hover {
+  background: rgb(23 91 67 / 8%);
+}
+
 .journal-toolbar button:disabled {
   cursor: wait;
   opacity: 0.6;
@@ -2224,9 +2234,8 @@ button:not(.coursebook-delete-button):not(.btn-remover):not(.btn-fechar):not(.mu
 
 .journal-note-item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: stretch;
+  gap: 8px;
   width: 100%;
   padding: 13px;
   border: 1px solid #e4e4e4;
@@ -2236,6 +2245,36 @@ button:not(.coursebook-delete-button):not(.btn-remover):not(.btn-fechar):not(.mu
   text-align: left;
   cursor: pointer;
 }
+
+.journal-note-select {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.journal-note-delete {
+  align-self: center;
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #b94a48;
+  border-radius: 8px;
+  background: transparent;
+  color: #a63836;
+  font: inherit;
+  cursor: pointer;
+}
+
+.journal-note-delete:hover { background: #fff1f0; }
+.journal-note-delete:disabled { cursor: wait; opacity: 0.6; }
 
 .journal-note-item:hover,
 .journal-note-item.active {

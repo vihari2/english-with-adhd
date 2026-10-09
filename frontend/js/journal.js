@@ -240,11 +240,14 @@ function renderJournalNotes() {
   }
 
   filteredNotes.forEach(note => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "journal-note-item";
-    if (note.id === currentJournalNoteId) button.classList.add("active");
-    button.dataset.noteId = note.id;
+    const item = document.createElement("div");
+    item.className = "journal-note-item";
+    if (note.id === currentJournalNoteId) item.classList.add("active");
+
+    const selectButton = document.createElement("button");
+    selectButton.type = "button";
+    selectButton.className = "journal-note-select";
+    selectButton.dataset.noteId = note.id;
 
     const title = document.createElement("strong");
     title.textContent = note.title || "Untitled note";
@@ -256,9 +259,48 @@ function renderJournalNotes() {
     const date = document.createElement("small");
     date.textContent = new Date(note.updated_at).toLocaleDateString();
 
-    button.append(title, preview, date);
-    list.appendChild(button);
+    selectButton.append(title, preview, date);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "journal-note-delete";
+    deleteButton.dataset.deleteNoteId = note.id;
+    deleteButton.textContent = "Delete";
+    deleteButton.setAttribute("aria-label", `Delete ${note.title || "Untitled note"}`);
+
+    item.append(selectButton, deleteButton);
+    list.appendChild(item);
   });
+}
+
+async function deleteJournalNote(noteId) {
+  const note = journalNotes.find(item => item.id === noteId);
+  if (!note || !journalUserId) return;
+  if (!window.confirm(`Delete “${note.title || "Untitled note"}”? This cannot be undone.`)) return;
+
+  const deleteButton = document.querySelector(`[data-delete-note-id="${CSS.escape(String(noteId))}"]`);
+  if (deleteButton) deleteButton.disabled = true;
+
+  try {
+    const { error } = await getSupabaseClient()
+      .from("journal_entries")
+      .delete()
+      .eq("id", noteId)
+      .eq("user_id", journalUserId);
+    if (error) throw error;
+
+    journalNotes = journalNotes.filter(item => item.id !== noteId);
+    if (currentJournalNoteId === noteId) {
+      const nextNote = journalNotes[0] ?? null;
+      loadJournalNote(nextNote);
+    }
+    renderJournalNotes();
+    setJournalStatus("Note deleted.");
+  } catch (error) {
+    console.error("Could not delete journal note:", error);
+    setJournalStatus("Could not delete your note. Please try again.");
+    if (deleteButton) deleteButton.disabled = false;
+  }
 }
 
 function confirmDiscardChanges() {
@@ -388,6 +430,12 @@ function handleJournalClick(event) {
 
     loadJournalNote(null);
     setJournalStatus("Start writing a new note.");
+    return;
+  }
+
+  const deleteButton = target.closest("[data-delete-note-id]");
+  if (deleteButton) {
+    deleteJournalNote(deleteButton.dataset.deleteNoteId);
     return;
   }
 
