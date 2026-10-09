@@ -8,17 +8,19 @@ let duracaoPomodoro = 25 * 60;
 let descansoMinutos = 5;
 
 function renderizarPomodoro(container) {
-    const atividades = ['Coursebook', 'Flashcards', 'Speak', 'Journal', 'Spaced Review', 'Rest'];
+    const atividades = ['Coursebook', 'Flashcards', 'Speak', 'Journal', 'Spaced Review'];
     container.innerHTML = `
         <section class="pomodoro-panel" aria-label="Pomodoro timer">
             <p class="pomodoro-caption">Choose what you want to work on</p>
             <div class="pomodoro-activities">
                 ${atividades.map((atividade) => `<button type="button" class="pomodoro-activity${atividade === atividadePomodoro ? ' selected' : ''}" aria-pressed="${atividade === atividadePomodoro}" onclick="selecionarAtividadePomodoro('${atividade}')">${atividade}</button>`).join('')}
             </div>
-            <div class="pomodoro-rest-options${atividadePomodoro === 'Rest' ? ' visible' : ''}" id="pomodoro-rest-options" aria-label="Rest duration">
+            <div class="pomodoro-rest-selector">
+                <button type="button" class="pomodoro-activity${atividadePomodoro === 'Rest' ? ' selected' : ''}" aria-pressed="${atividadePomodoro === 'Rest'}" onclick="selecionarAtividadePomodoro('Rest')">Rest</button>
+                <div class="pomodoro-rest-options${atividadePomodoro === 'Rest' ? ' visible' : ''}" id="pomodoro-rest-options" aria-label="Rest duration">
                 <span>Rest length:</span>
                 <button type="button" class="pomodoro-rest-choice${descansoMinutos === 5 ? ' selected' : ''}" aria-pressed="${descansoMinutos === 5}" onclick="definirDescansoPomodoro(5)">5 min</button>
-                <button type="button" class="pomodoro-rest-choice${descansoMinutos === 20 ? ' selected' : ''}" aria-pressed="${descansoMinutos === 20}" onclick="definirDescansoPomodoro(20)">20 min</button>
+                </div>
             </div>
             <div class="pomodoro-clock" id="pomodoro-clock" role="timer" aria-live="polite">${formatarTempoPomodoro()}</div>
             <p class="pomodoro-current">Focus: <strong id="pomodoro-current">${atividadePomodoro}</strong></p>

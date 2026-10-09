@@ -207,7 +207,8 @@ button, input, textarea, select {
     font: inherit; font-size: 0.9rem; background: #f1f5f9; color: #334155;
 }
 .pomodoro-activity.selected { background: #175b43; color: #fff; }
-.pomodoro-rest-options { display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; color: #64748b; }
+.pomodoro-rest-selector { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; }
+.pomodoro-rest-options { display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; color: #64748b; }
 .pomodoro-rest-options.visible { display: flex; }
 .pomodoro-rest-choice { border: 1px solid #fed7aa; border-radius: 10px; padding: 7px 12px; background: #fff; color: #9a3412; cursor: pointer; font: inherit; }
 .pomodoro-rest-choice.selected { background: #ffedd5; border-color: #fb923c; font-weight: 700; }
@@ -504,16 +505,16 @@ textarea {
 .btn-excluir-baralho {
     margin-top: 12px;
     padding: 9px 14px;
-    border: 1px solid #fecaca;
+    border: 1px solid #16804a;
     border-radius: 10px;
-    background: #fff;
-    color: #b91c1c;
+    background: transparent;
+    color: #16804a;
     cursor: pointer;
     font: inherit;
     font-weight: 600;
 }
 
-.btn-excluir-baralho:hover { background: #fef2f2; }
+.btn-excluir-baralho:hover { background: rgba(22, 128, 74, 0.08); }
 
 .tela-estudo {
     display: flex;
@@ -924,9 +925,10 @@ textarea {
 }
 
 .btn-remover {
-    color: #ff4d4f;
+    color: #16804a;
     background: transparent;
-    border: none;
+    border: 1px solid #16804a;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
 }
@@ -1100,8 +1102,8 @@ textarea {
 
 .dark-mode .criar-baralho-controles .btn-confirmar-baralho:hover { background: #124936; }
 .dark-mode .criar-baralho-controles .btn-cancelar-criar-baralho:hover { background: #4b5263; }
-.dark-mode .btn-excluir-baralho { border-color: #7f3030; background: #352328; color: #fca5a5; }
-.dark-mode .btn-excluir-baralho:hover { background: #44272d; }
+.dark-mode .btn-excluir-baralho { border-color: #4ade80; background: transparent; color: #4ade80; }
+.dark-mode .btn-excluir-baralho:hover { background: rgba(74, 222, 128, 0.1); }
 .dark-mode .modal-content tr,
 .dark-mode .flashcards-header,
 .dark-mode .bloco-observacoes { border-color: #3b4050; }
@@ -1217,13 +1219,25 @@ body.resource-page {
 .profile-avatar-preview[hidden] { display: none; }
 .profile-editor-status { min-height: 1.2em; margin: 14px 0; color: #64748b; font-size: 14px; }
 
-.resource-topbar > #logout-btn {
+.resource-topbar > #logout-btn,
+.account-topbar > #logout-btn {
   padding: 8px 15px;
-  border: 0;
+  border: 1px solid #16804a;
   border-radius: 10px;
-  background: #dc2626;
-  color: #fff;
+  background: transparent;
+  color: #16804a;
   cursor: pointer;
+}
+
+.resource-topbar > #logout-btn:hover,
+.account-topbar > #logout-btn:hover {
+  background: rgba(22, 128, 74, 0.08);
+}
+
+.dark-mode .resource-topbar > #logout-btn,
+.dark-mode .account-topbar > #logout-btn {
+  border-color: #4ade80;
+  color: #4ade80;
 }
 
 .edit-account-button, .resource-topbar > #logout-btn, .account-topbar > #logout-btn {
@@ -1246,7 +1260,7 @@ body.resource-page {
   .account-summary { gap: 5px; }
   .account-name { max-width: 76px; }
   .edit-account-button { padding: 7px 8px; }
-  .resource-topbar > #logout-btn { padding: 7px 9px; }
+  .resource-topbar > #logout-btn, .account-topbar > #logout-btn { padding: 7px 9px; }
 }
 
 body.sidebar-enabled .menu-toggle {
@@ -1703,6 +1717,27 @@ body.sidebar-enabled .menu-toggle {
   .learning-path-connector {
     flex-basis: 24px;
   }
+}
+
+/* Shared button sizing and typography across the app. */
+button:not(.coursebook-delete-button):not(.btn-remover):not(.btn-fechar):not(.music-play-button),
+.edit-account-button {
+    box-sizing: border-box;
+    min-height: 40px;
+    padding: 9px 14px !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+}
+
+.coursebook-delete-button,
+.btn-remover,
+.btn-fechar,
+.music-play-button {
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.2;
 }
 
 
@@ -2401,8 +2436,9 @@ body.journal-modal-open {
 }
 
 .speaking-delete-button:hover {
-    border-color: #c66;
-    color: #b33;
+    border-color: #10663a;
+    color: #10663a;
+    background: rgba(22, 128, 74, 0.08);
 }
 
 .speaking-note-card {
@@ -2792,9 +2828,9 @@ body.journal-modal-open {
     width: 34px;
     height: 34px;
     padding: 0;
-    color: #e34b55;
+    color: #16804a;
     background: transparent;
-    border: 1px solid transparent;
+    border: 1px solid #16804a;
     border-radius: 8px;
     font-size: 1.45rem;
     line-height: 1;
@@ -2803,8 +2839,8 @@ body.journal-modal-open {
 }
 
 .coursebook-delete-button:hover {
-    background: #fff0f1;
-    border-color: #ffdade;
+    background: rgba(22, 128, 74, 0.08);
+    border-color: #10663a;
 }
 
 .coursebook-empty {
