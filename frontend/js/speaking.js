@@ -123,7 +123,7 @@ function renderizarGoogleMeet(container) {
                 <div class="speaking-section-heading">
                     <div class="speaking-icon" aria-hidden="true">✎</div>
                     <div>
-                        <h3>Practice Journal</h3>
+                        <h3>Learning Notes</h3>
                         <p>Reflect on what you learned after each conversation.</p>
                     </div>
 
