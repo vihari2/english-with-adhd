@@ -2621,3 +2621,229 @@ body.journal-modal-open {
 }
 
 
+/* ========================================
+   MY COURSEBOOK
+   ======================================== */
+
+.coursebook-page {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 0 24px;
+    color: #172b4d;
+}
+
+.coursebook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.coursebook-header h2 {
+    margin: 0;
+    color: #102b50;
+    font-size: clamp(1.7rem, 3vw, 2.35rem);
+    font-weight: 750;
+    letter-spacing: -0.8px;
+}
+
+.coursebook-header p {
+    margin: 7px 0 0;
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+.coursebook-add-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 18px;
+    color: #ffffff;
+    background: #16804a;
+    border: 1px solid #16804a;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.coursebook-add-button:hover {
+    background: #10663a;
+    transform: translateY(-1px);
+}
+
+.coursebook-add-button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.coursebook-card {
+    width: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e8edf2;
+    border-radius: 16px;
+    box-shadow: 0 6px 22px rgba(20, 40, 70, 0.045);
+}
+
+.coursebook-table-wrapper {
+    width: 100%;
+    max-height: 460px;
+    overflow: auto;
+}
+
+.coursebook-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.coursebook-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 14px 12px;
+    color: #718096;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5eaf0;
+    font-size: 0.82rem;
+    font-weight: 650;
+    text-align: left;
+}
+
+.coursebook-table th:first-child {
+    width: 34%;
+}
+
+.coursebook-table th:nth-child(2) {
+    width: 27%;
+}
+
+.coursebook-table th:nth-child(3) {
+    width: 25%;
+}
+
+.coursebook-table th:last-child {
+    width: 64px;
+}
+
+.coursebook-table tbody tr {
+    transition: background 0.15s;
+}
+
+.coursebook-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.coursebook-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #edf0f4;
+    vertical-align: middle;
+}
+
+.coursebook-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 10px;
+    box-sizing: border-box;
+    color: #243449;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.9rem;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.coursebook-input::placeholder {
+    color: #a0aaba;
+}
+
+.coursebook-input:hover {
+    background: #ffffff;
+    border-color: #e0e7e2;
+}
+
+.coursebook-input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #16804a;
+    box-shadow: 0 0 0 3px rgba(22, 128, 74, 0.09);
+}
+
+.coursebook-date {
+    cursor: pointer;
+}
+
+.coursebook-action-cell {
+    text-align: center;
+}
+
+.coursebook-delete-button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: #e34b55;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 1.45rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.coursebook-delete-button:hover {
+    background: #fff0f1;
+    border-color: #ffdade;
+}
+
+.coursebook-empty {
+    padding: 42px 16px !important;
+    text-align: center;
+    color: #718096;
+}
+
+.coursebook-empty span {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 1.8rem;
+}
+
+.coursebook-empty strong {
+    display: block;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.coursebook-empty p {
+    margin: 8px 0 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+    .coursebook-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .coursebook-card {
+        padding: 12px;
+    }
+
+    .coursebook-table {
+        min-width: 650px;
+    }
+}
+
+
+

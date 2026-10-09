@@ -59,9 +59,6 @@ function renderizarGoogleMeet(container) {
     container.innerHTML = `
         <div class="speaking-page">
 
-            <header class="speaking-header">
-            </header>
-
             <section class="speaking-section meet-section">
                 <div class="speaking-section-heading">
                     <div class="speaking-icon" aria-hidden="true">↗</div>

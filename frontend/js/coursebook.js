@@ -1,26 +1,43 @@
 /** Coursebook progress helpers. */
 
 // -- My Coursebook --
+
 function renderizarCoursebook(container) {
     container.innerHTML = `
-        <div style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
-            <button class="btn-adicionar-linha" onclick="adicionarLivroCoursebook()">+ Add Book</button>
-            <table class="tabela-meet" style="margin-top: 15px;">
-                <thead>
-                    <tr>
-                        <th style="width: 40%;">Book Name</th>
-                        <th style="width: 25%;">Page/Chapter</th>
-                        <th style="width: 25%;">Date</th>
-                        <th style="width: 10%;"></th>
-                    </tr>
-                </thead>
-                <tbody id="corpo-tabela-coursebook">
-                </tbody>
-            </table>
+        <div class="coursebook-page">
+            <div class="coursebook-header">
+                <button
+                    type="button"
+                    class="coursebook-add-button"
+                    onclick="adicionarLivroCoursebook()"
+                >
+                    <span aria-hidden="true">+</span>
+                    Add book
+                </button>
+            </div>
+
+            <div class="coursebook-card">
+                <div class="coursebook-table-wrapper">
+                    <table class="coursebook-table">
+                        <thead>
+                            <tr>
+                                <th>Book name</th>
+                                <th>Page / Chapter</th>
+                                <th>Date</th>
+                                <th aria-label="Actions"></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="corpo-tabela-coursebook"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     `;
+
     carregarCoursebookSalvo();
 }
+
 
 function carregarCoursebookSalvo() {
     const corpoTabela = document.getElementById('corpo-tabela-coursebook');
@@ -40,13 +57,90 @@ function carregarCoursebookSalvo() {
     });
 }
 
+
+function carregarCoursebookSalvo() {
+    const corpoTabela = document.getElementById('corpo-tabela-coursebook');
+    if (!corpoTabela) return;
+
+    const livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
+
+    const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+
+    if (livros.length === 0) {
+        corpoTabela.innerHTML = `
+            <tr>
+                <td colspan="4" class="coursebook-empty">
+                    <span aria-hidden="true">📚</span>
+                    <strong>Your reading list is empty</strong>
+                    <p>Add a book to start tracking your progress.</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    corpoTabela.innerHTML = livros.map((item, index) => `
+        <tr>
+            <td>
+                <input
+                    type="text"
+                    class="coursebook-input"
+                    value="${escapeHTML(item.nome)}"
+                    onchange="salvarEdicaoCoursebook(${index}, 'nome', this.value)"
+                    placeholder="Book title"
+                    aria-label="Book name"
+                >
+            </td>
+
+            <td>
+                <input
+                    type="text"
+                    class="coursebook-input"
+                    value="${escapeHTML(item.parada)}"
+                    onchange="salvarEdicaoCoursebook(${index}, 'parada', this.value)"
+                    placeholder="Chapter or page"
+                    aria-label="Page or chapter"
+                >
+            </td>
+
+            <td>
+                <input
+                    type="date"
+                    class="coursebook-input coursebook-date"
+                    value="${escapeHTML(item.data)}"
+                    onchange="salvarEdicaoCoursebook(${index}, 'data', this.value)"
+                    aria-label="Reading date"
+                >
+            </td>
+
+            <td class="coursebook-action-cell">
+                <button
+                    type="button"
+                    class="coursebook-delete-button"
+                    onclick="removerCoursebook(${index})"
+                    aria-label="Delete book"
+                    title="Delete book"
+                >
+                    &times;
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+
 function adicionarLivroCoursebook() {
-    let livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
-    let dataHoje = new Date().toISOString().split('T')[0];
-    livros.push({ nome: '', parada: '', data: dataHoje });
+    const livros = JSON.parse(appStorage.getItem('meuCoursebook')) || [];
+    livros.push({ nome: '', parada: '', data: new Date().toISOString().slice(0, 10) });
     appStorage.setItem('meuCoursebook', JSON.stringify(livros));
     carregarCoursebookSalvo();
-    avancarParaFlashcards();
+    document.querySelector('#corpo-tabela-coursebook tr:last-child input[aria-label="Book name"]')?.focus();
 }
 
 async function avancarParaFlashcards() {
