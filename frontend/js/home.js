@@ -16,7 +16,7 @@ const Home = (() => {
       number: 1,
       title: "Continue with your coursebook",
       description: "Learn one section today. Small steps count.",
-      icon: "📘",
+      icon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5z"/><path d="M5 4.5v17M9 6h7M9 9h7"/></svg>',
       button: "Open coursebook",
       link: pages.coursebook
     },
@@ -25,7 +25,7 @@ const Home = (() => {
       number: 2,
       title: "Time for your flashcards",
       description: "Practice the new vocabulary from your coursebook.",
-      icon: "🗂️",
+      icon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M8 8h8M8 12h5M8 16h3"/><path d="M3 7v12a2 2 0 0 0 2 2"/></svg>',
       button: "Start flashcards",
       link: pages.flashcards
     },
@@ -34,14 +34,14 @@ const Home = (() => {
       number: 3,
       title: "Choose your practice",
       description: "Use what you learned. Speak or write about it.",
-      icon: "✍️"
+      icon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 16.5-.8 4.3 4.3-.8L19.8 7.7a2.1 2.1 0 0 0-3-3z"/><path d="m14.8 6.7 3 3M4 21h16"/></svg>',
     },
 
     feedback: {
       number: 4,
       title: "Get AI feedback",
       description: "Review your writing and connect it to your coursebook.",
-      icon: "✨",
+      icon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>',
       button: "Review my writing",
       link: pages.feedback
     },
@@ -50,7 +50,7 @@ const Home = (() => {
       number: 5,
       title: "Spaced review",
       description: "Review due flashcards and gaps identified by AI.",
-      icon: "🔄",
+      icon: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-5l3 5"/><path d="M12 8v4l2.5 1.5"/></svg>',
       button: "Start review",
       link: pages.review
     }
@@ -194,7 +194,8 @@ const Home = (() => {
           href="${pages.speaking}"
           data-practice="speaking"
         >
-          🎙️ Speaking
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>
+          Speaking
         </a>
 
         <a
@@ -202,7 +203,8 @@ const Home = (() => {
           href="${pages.journal}"
           data-practice="journal"
         >
-          ✍️ Writing Journal
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 16.5-.8 4.3 4.3-.8L19.8 7.7a2.1 2.1 0 0 0-3-3z"/><path d="m14.8 6.7 3 3M4 21h16"/></svg>
+          Writing Journal
         </a>
       </div>
     `;
@@ -266,7 +268,8 @@ const Home = (() => {
       const saved = await setProgress("practice", choice);
 
       if (saved) {
-        window.location.href = destination;
+        if (window.navigateAppPage) window.navigateAppPage(destination);
+        else window.location.href = destination;
       }
 
       return;
@@ -330,6 +333,11 @@ const Home = (() => {
         'O elemento "#your-next-step" não foi encontrado.'
       );
       return;
+    }
+
+    const pomodoroContainer = document.querySelector("#home-pomodoro-content");
+    if (pomodoroContainer && typeof renderizarPomodoro === "function") {
+      renderizarPomodoro(pomodoroContainer);
     }
 
     if (container.dataset.homeInitialized !== "true") {

@@ -12,7 +12,6 @@
 </head>
 
 <body>
-    <section id="your-next-step"></section>
     <div class="dev-banner">
         Project still in development. Found a bug? Email me at <a
             href="mailto:vitoriafmq@gmail.com">vitoriafmq@gmail.com</a>
@@ -79,6 +78,9 @@
     ">Fechar</button>
     </div>
 
+    <main class="home-bento" aria-label="Home dashboard">
+        <section id="your-next-step" class="home-bento-next"></section>
+
     <!-- Learning Path -->
         <section class="learning-path" aria-labelledby="learning-path-title">
             <h2 id="learning-path-title" class="learning-path-title">
@@ -88,35 +90,35 @@
             <div class="learning-path-steps">
 
                 <div class="learning-path-step" data-step="coursebook">
-                    <div class="learning-path-icon">📘</div>
+                    <div class="learning-path-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5z"/><path d="M5 4.5v17M9 6h7M9 9h7"/></svg></div>
                     <span class="learning-path-label">Coursebook</span>
                 </div>
 
                 <div class="learning-path-connector"></div>
 
                 <div class="learning-path-step" data-step="flashcards">
-                    <div class="learning-path-icon">🗂️</div>
+                    <div class="learning-path-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M8 8h8M8 12h5M8 16h3"/><path d="M3 7v12a2 2 0 0 0 2 2"/></svg></div>
                     <span class="learning-path-label">Flashcards</span>
                 </div>
 
                 <div class="learning-path-connector"></div>
 
                 <div class="learning-path-step" data-step="practice">
-                    <div class="learning-path-icon">✍️</div>
+                    <div class="learning-path-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 16.5-.8 4.3 4.3-.8L19.8 7.7a2.1 2.1 0 0 0-3-3z"/><path d="m14.8 6.7 3 3M4 21h16"/></svg></div>
                     <span class="learning-path-label">Practice</span>
                 </div>
 
                 <div class="learning-path-connector"></div>
 
                 <div class="learning-path-step" data-step="feedback">
-                    <div class="learning-path-icon">✨</div>
+                    <div class="learning-path-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></div>
                     <span class="learning-path-label">AI Feedback</span>
                 </div>
 
                 <div class="learning-path-connector"></div>
 
                 <div class="learning-path-step" data-step="review">
-                    <div class="learning-path-icon">🔄</div>
+                    <div class="learning-path-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 7v5h-5"/><path d="M19 12a7 7 0 1 1-2-5l3 5"/><path d="M12 8v4l2.5 1.5"/></svg></div>
                     <span class="learning-path-label">Spaced Review</span>
                 </div>
 
@@ -127,6 +129,12 @@
                 Writing Journal includes AI Feedback before review.
             </p>
         </section>
+
+        <section class="home-pomodoro" aria-labelledby="home-pomodoro-title">
+            <h2 id="home-pomodoro-title">Pomodoro</h2>
+            <div id="home-pomodoro-content"></div>
+        </section>
+    </main>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

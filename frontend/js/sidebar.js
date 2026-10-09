@@ -12,7 +12,6 @@
         <a href="flashcards.html" class="nav-link"><span>◈</span> Flashcards</a>
         <a href="speaking.html" class="nav-link"><span>♫</span> Speaking</a>
         <a href="writing-journal.html" class="nav-link"><span>✎</span> Writing Journal</a>
-        <a href="pomodoro.html" class="nav-link"><span>◷</span> Pomodoro</a>
         <a href="resources.html" class="nav-link"><span>↗</span> Resources</a>
       </nav>
     </aside>`;
@@ -166,6 +165,8 @@
       window.location.href = url.href;
     }
   }
+
+  window.navigateAppPage = (url) => navigateTo(new URL(url, window.location.href));
 
   document.addEventListener("click", (event) => {
     const link = event.target.closest("a[href]");
