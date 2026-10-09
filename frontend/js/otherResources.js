@@ -2,7 +2,7 @@
 function renderizarOtherResources(container) {
     container.innerHTML = `
         <div style="max-height: 450px; overflow-y: auto; padding-right: 10px; font-size: 0.9em;">
-            <h3 style="color: #175b43; margin-top: 0;">🌐 Online Tools & Utilities</h3>
+            <h3 class="other-resources-heading" style="margin-top: 0;"><svg class="other-resource-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>Online Tools &amp; Utilities</h3>
              
               <table class="tabela-meet" style="margin-bottom: 20px;">
                     <tr><th>Resource</th><th>Purpose</th></tr>
@@ -23,7 +23,7 @@ function renderizarOtherResources(container) {
                         <td>Hear real native pronunciation via YouTube.</td>
                     </tr>
                 </table>
-                <h3 style="color: #175b43;">🌐 Reading Websites</h3>
+                <h3 class="other-resources-heading"><svg class="other-resource-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>Reading Websites</h3>
 
                 <table class="tabela-meet" style="margin-bottom: 20px;">
                     <tr>
@@ -150,7 +150,7 @@ function renderizarOtherResources(container) {
                      
                 </table>
 
-            <h3 style="color: #175b43;">📖 English Books by CEFR Level</h3>
+            <h3 class="other-resources-heading"><svg class="other-resource-heading-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22.5z"/><path d="M4 5.5v17M8 7h8M8 10h8"/></svg>English Books by CEFR Level</h3>
 
             <table class="tabela-meet" style="margin-bottom: 20px;">
                 <tr>

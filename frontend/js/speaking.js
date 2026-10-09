@@ -80,7 +80,7 @@ function renderizarGoogleMeet(container) {
                         >
 
                         <button type="submit" class="speaking-button">
-                            Save link
+                            Link
                         </button>
                     </div>
 

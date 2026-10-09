@@ -2,7 +2,7 @@
   const sidebarMarkup = `
     <aside class="sidebar" id="sidebar">
       <a href="dashboard.html" class="sidebar-brand">
-        <span class="brand-icon">🧠</span>
+        <span class="brand-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20H9a4 4 0 0 1-3.8-5.3A4 4 0 0 1 7 7a3.5 3.5 0 0 1 5-3z"/><path d="M12 20h3a4 4 0 0 0 3.8-5.3A4 4 0 0 0 17 7a3.5 3.5 0 0 0-5-3z"/><path d="M12 4v16M8.5 9.5a2 2 0 0 0 2 2M15.5 9.5a2 2 0 0 1-2 2"/></svg></span>
         <span class="brand-name">English with ADHD</span>
         <span class="brand-subtitle">Output First</span>
       </a>

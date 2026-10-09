@@ -505,16 +505,16 @@ textarea {
 .btn-excluir-baralho {
     margin-top: 12px;
     padding: 9px 14px;
-    border: 1px solid #16804a;
+    border: 1px solid #175b43;
     border-radius: 10px;
     background: transparent;
-    color: #16804a;
+    color: #175b43;
     cursor: pointer;
     font: inherit;
     font-weight: 600;
 }
 
-.btn-excluir-baralho:hover { background: rgba(22, 128, 74, 0.08); }
+.btn-excluir-baralho:hover { background: rgba(23, 91, 67, 0.08); }
 
 .tela-estudo {
     display: flex;
@@ -925,9 +925,9 @@ textarea {
 }
 
 .btn-remover {
-    color: #16804a;
+    color: #175b43;
     background: transparent;
-    border: 1px solid #16804a;
+    border: 1px solid #175b43;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
@@ -971,6 +971,25 @@ textarea {
 .tabela-meet td {
     padding: 8px;
     border-bottom: 1px solid #eee;
+}
+
+.other-resources-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #111827;
+}
+
+.other-resource-heading-icon {
+    display: block;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: #175b43;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .input-meet {
@@ -1222,16 +1241,16 @@ body.resource-page {
 .resource-topbar > #logout-btn,
 .account-topbar > #logout-btn {
   padding: 8px 15px;
-  border: 1px solid #16804a;
+  border: 1px solid #175b43;
   border-radius: 10px;
   background: transparent;
-  color: #16804a;
+  color: #175b43;
   cursor: pointer;
 }
 
 .resource-topbar > #logout-btn:hover,
 .account-topbar > #logout-btn:hover {
-  background: rgba(22, 128, 74, 0.08);
+  background: rgba(23, 91, 67, 0.08);
 }
 
 .dark-mode .resource-topbar > #logout-btn,
@@ -1331,7 +1350,26 @@ body.sidebar-enabled .menu-toggle {
 }
 
 .brand-icon {
-  font-size: 28px;
+  display: flex;
+  align-items: center;
+  color: #175b43;
+}
+
+.dev-banner a {
+    color: #175b43;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.brand-icon svg {
+  display: block;
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .brand-name {
@@ -1365,6 +1403,10 @@ body.sidebar-enabled .menu-toggle {
   width: 22px;
   text-align: center;
   font-size: 19px;
+}
+
+.sidebar-nav .nav-link > span:first-child {
+  color: #175b43;
 }
 
 .nav-link:hover {
@@ -1819,13 +1861,13 @@ body.sidebar-enabled .menu-toggle {
 .home-pomodoro .pomodoro-rest-selector > .pomodoro-activity {
   width: auto;
   flex: 0 0 auto;
-  border: 1px solid #16804a;
+  border: 1px solid #175b43;
   background: transparent;
-  color: #16804a;
+  color: #175b43;
 }
 
 .home-pomodoro .pomodoro-rest-selector > .pomodoro-activity:hover {
-  background: rgba(22, 128, 74, 0.08);
+  background: rgba(23, 91, 67, 0.08);
 }
 
 .home-pomodoro .pomodoro-rest-selector {
@@ -2490,13 +2532,17 @@ body.journal-modal-open {
 }
 
 .speaking-button-primary {
-    background: #17634d;
+    background: #175b43;
     color: #fff;
 }
 
-.speaking-button-primary:hover,
-.speaking-button:hover {
-    filter: brightness(0.96);
+.speaking-button-primary:hover {
+    background: #124936;
+}
+
+.speaking-button-secondary:hover {
+    background: rgba(23, 91, 67, 0.08);
+    border-color: #175b43;
 }
 
 .speaking-button-secondary {
@@ -2625,19 +2671,19 @@ body.journal-modal-open {
 
 .speaking-delete-button {
     padding: 7px 10px;
-    border: 1px solid var(--border-color, #ddd);
+    border: 1px solid #175b43;
     border-radius: 8px;
     background: transparent;
-    color: var(--secondary-text, #707070);
+    color: #175b43;
     font: inherit;
     font-size: 0.82rem;
     cursor: pointer;
 }
 
 .speaking-delete-button:hover {
-    border-color: #10663a;
-    color: #10663a;
-    background: rgba(22, 128, 74, 0.08);
+    border-color: #124936;
+    color: #124936;
+    background: rgba(23, 91, 67, 0.08);
 }
 
 .speaking-note-card {
@@ -2898,8 +2944,8 @@ body.journal-modal-open {
     min-height: 44px;
     padding: 11px 18px;
     color: #ffffff;
-    background: #16804a;
-    border: 1px solid #16804a;
+    background: #175b43;
+    border: 1px solid #175b43;
     border-radius: 10px;
     font: inherit;
     font-size: 0.92rem;
@@ -2909,7 +2955,7 @@ body.journal-modal-open {
 }
 
 .coursebook-add-button:hover {
-    background: #10663a;
+    background: #124936;
     transform: translateY(-1px);
 }
 
@@ -3011,7 +3057,7 @@ body.journal-modal-open {
 .coursebook-input:focus {
     outline: none;
     background: #ffffff;
-    border-color: #16804a;
+    border-color: #175b43;
     box-shadow: 0 0 0 3px rgba(22, 128, 74, 0.09);
 }
 
@@ -3027,9 +3073,9 @@ body.journal-modal-open {
     width: 34px;
     height: 34px;
     padding: 0;
-    color: #16804a;
+    color: #175b43;
     background: transparent;
-    border: 1px solid #16804a;
+    border: 1px solid #175b43;
     border-radius: 8px;
     font-size: 1.45rem;
     line-height: 1;
@@ -3038,8 +3084,8 @@ body.journal-modal-open {
 }
 
 .coursebook-delete-button:hover {
-    background: rgba(22, 128, 74, 0.08);
-    border-color: #10663a;
+    background: rgba(23, 91, 67, 0.08);
+    border-color: #124936;
 }
 
 .coursebook-empty {
@@ -3063,6 +3109,52 @@ body.journal-modal-open {
 .coursebook-empty p {
     margin: 8px 0 0;
     font-size: 0.9rem;
+}
+
+/* Keep primary action buttons on the same green and hover color. */
+.auth-actions button:not(.secondary):not(.danger):hover,
+.btn-fechar:hover,
+.btn-criar-baralho:hover,
+.criar-baralho-controles .btn-confirmar-baralho:hover,
+.btn-estudar-agora:not(:disabled):hover,
+.btn-mostrar-resposta:hover,
+.btn-avaliacao.bom:hover,
+.btn-salvar-flashcard:hover,
+.edit-account-button:hover,
+.profile-save-button:hover,
+.next-step-button:hover,
+.journal-toolbar .journal-save-button:hover,
+.speaking-button-primary:hover,
+.coursebook-add-button:hover,
+.pomodoro-controls button:not(.pomodoro-reset):hover,
+.pomodoro-activity.selected:hover {
+    background-color: #124936;
+}
+
+.pomodoro-activity:not(.selected):hover {
+    background-color: rgba(23, 91, 67, 0.08);
+    color: #175b43;
+}
+
+/* Keep outlined actions green, with a subtle green hover. */
+.resource-topbar > #logout-btn:hover,
+.account-topbar > #logout-btn:hover,
+.btn-remover:hover,
+.btn-excluir-baralho:hover,
+.coursebook-delete-button:hover,
+.speaking-delete-button:hover,
+.pomodoro-rest-selector > .pomodoro-activity:hover {
+    border-color: #124936;
+    background-color: rgba(23, 91, 67, 0.08);
+    color: #124936;
+}
+
+.home-pomodoro .pomodoro-rest-selector > .pomodoro-activity:hover {
+    color: #124936;
+}
+
+#modal-config-bg > button:hover {
+    background: #124936 !important;
 }
 
 @media (max-width: 700px) {
